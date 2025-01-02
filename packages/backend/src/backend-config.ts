@@ -29,5 +29,9 @@ export const CONFIG: typeof env= {
     NODE_ENV: 'development',
     HMAC_SECRET: 'devsecret',
     PUBLIC_URL: 'https://localhost',
+    SMTP_HOST: 'smtp.ethereal.email',
+    SMTP_PORT: '587',
+    SMTP_USER: 'raphaelle.stamm95@ethereal.email',
+    SMTP_PASSWORD: 'ujDd9JezSyrnNvxCZA',
     ...env,
 }
