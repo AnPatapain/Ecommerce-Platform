@@ -15,13 +15,11 @@ export const Auth = () => {
         setLoading(true);
         try {
             if (isSignup) {
-                // Signup logic
                 const response = await apiClient.auth.signup({ name, email, password });
                 setResponseMessage(
                     `Please verify your email by clicking this link: ${response.mailPreviewUrl}`
                 );
             } else {
-                // Login logic
                 const response = await apiClient.auth.signin({ email, password });
                 if (response.mailPreviewUrl) {
                     setResponseMessage(
