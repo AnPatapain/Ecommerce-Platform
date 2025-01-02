@@ -92,7 +92,7 @@ jobs:
       - name: SSH into server and sync the source code
         run: |
           ssh VPS_SERVER << EOF
-            cd ~/Official-Fullstack-Skeleton
+            cd ~/Ecommerce-Platform
             git reset --hard
             git clean -fd
             git pull origin main
@@ -102,7 +102,7 @@ jobs:
       - name: Start backend process
         run: |
           ssh VPS_SERVER << EOF
-            cd ~/Official-Fullstack-Skeleton
+            cd ~/Ecommerce-Platform
             ./infrastructure/entrypoint.sh prod
           EOF
 
