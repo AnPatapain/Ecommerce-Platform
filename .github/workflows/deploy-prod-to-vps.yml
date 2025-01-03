@@ -103,7 +103,7 @@ jobs:
         run: |
           ssh VPS_SERVER << EOF
             cd ~/Ecommerce-Platform
-            ./infrastructure/entrypoint.sh prod
+            ./infrastructure/entrypoint prod
           EOF
 
       - name: Restart Nginx
