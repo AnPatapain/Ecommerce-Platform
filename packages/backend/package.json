@@ -19,6 +19,7 @@
   "dependencies": {
     "@app/shared-models": "workspace:*",
     "@app/shared-utils": "workspace:*",
+
     "@prisma/client": "^6.1.0",
     "prisma": "^6.1.0",
     "ts-node": "^10.9.2",

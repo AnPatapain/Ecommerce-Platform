@@ -4,13 +4,14 @@
 # - nginx-reverse-proxy-prod: reverse proxy forwarding the /api prefix request
 #   to backend process and all other requests to frontend process (vite server)
 #
-# Note: The command to run BE and FE processes is DOCKER_APP_CMD which is defined in infrastructure/entrypoint.sh
+# Note: The command to run BE and FE processes is DOCKER_APP_CMD which is defined in infrastructure/entrypoint
 # Author: Ke An Nguyen
 version: '1.29.2'
 
 services:
   app-dev:
-    container_name: app-dev
+    image: shop-monorepo-image:1.0
+    container_name: shop-monorepo-app-dev
     build:
       context: ..
       dockerfile_inline: |
@@ -47,7 +48,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   nginx-reverse-proxy-dev:
-    container_name: nginx-reverse-proxy-dev
+    container_name: shop-nginx-revproxy-dev
     image: nginx:alpine
     volumes:
       - "${NGINX_DEV}:/etc/nginx/conf.d/nginx-dev.conf:Z"
@@ -60,4 +61,3 @@ services:
 
 volumes:
   postgres_data:
-    name: postgres_data

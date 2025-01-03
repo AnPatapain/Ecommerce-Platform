@@ -117,8 +117,8 @@ Typically, workflows is around changing the model schema, to do that, you need:
 
 Note: Whenever change a model inside schema.prisma, always clean restart app:
 ```shell
-./infrastructure/entrypoint.sh clean
-./infrastructure/entrypoint.sh dev
+./infrastructure/entrypoint clean
+./infrastructure/entrypoint dev
 ```
 
 ## Architecture  

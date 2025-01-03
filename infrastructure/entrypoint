@@ -1,8 +1,8 @@
 #!/bin/bash
 ############################################################################
-# entrypoint.sh
+# entrypoint
 # Entry point for running development, production, test environment
-# Run entrypoint.sh --help to see all supported operations
+# Run entrypoint --help to see all supported operations
 # Author: Ke An Nguyen
 ############################################################################
 
@@ -67,9 +67,10 @@ display_help() {
   echo "  -h, --help           Display this help message"
   echo ""
   echo "Examples:"
-  echo "  ./run.sh dev         Start the app in development mode with hot-reloading enabled"
-  echo "  ./run.sh prod        Build and deploy the app in production mode"
-  echo "  ./run.sh clean       Remove all build artifacts and node_modules to clean the environment"
+  echo "  ./entrypoint dev         Start the app in development mode with hot-reloading enabled"
+  echo "  ./entrypoint prod        Build and deploy the app in production mode"
+  echo "  ./entrypoint clean       Remove all build artifacts and node_modules to clean the environment"
+  echo "  ./entrypoint up          Start the existing app docker container (Need to build first)"
   echo ""
   echo "Important Notes"
   echo "- Don't run run.sh with 'sudo'"
@@ -217,11 +218,34 @@ run_dev() {
   # DOCKER_DEV_ENTRY_CMD will be used in DOCKER_COMPOSE_DEV file as an entry point to run the application in dev env
   export DOCKER_DEV_ENTRY_CMD="pnpm i && pnpm run dev"
   mkdir -p node_modules
+
+  # Prune specific Docker images defined in docker-compose-local.yml
+  images=("shop-monorepo-image:1.0")
+
+  for image in "${images[@]}"; do
+      if docker image inspect "$image" > /dev/null 2>&1; then
+          docker rmi -f "$image"
+      else
+          echo "Image $image not found, skipping..."
+      fi
+  done
+
   docker compose -f "${DOCKER_COMPOSE_DEV}" build --no-cache
   docker compose -f "${DOCKER_COMPOSE_DEV}" up --remove-orphans -d
   docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f app-dev -f postgres-db -f nginx-reverse-proxy-dev # Service name not container name
   docker compose -f "${DOCKER_COMPOSE_DEV}" down -t 1
 }
+
+
+run_up(){
+  sync_env_files
+  export DOCKER_DEV_ENTRY_CMD="pnpm i && pnpm run dev"
+  mkdir -p node_modules
+  docker compose -f "${DOCKER_COMPOSE_DEV}" up --remove-orphans -d
+  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f app-dev -f postgres-db -f nginx-reverse-proxy-dev # Service name not container name
+  docker compose -f "${DOCKER_COMPOSE_DEV}" down -t 1
+}
+
 
 if [[ "$1" = "help" || "$1" = "--help" || "$1" = "-h" ]]; then
   display_help
@@ -252,6 +276,10 @@ elif [[ "$1" = "dev" ]]; then
     echo "Prerequisites not met. Exiting."
     exit 1
   fi
+  exit 0
+
+elif [[ "$1" = "up" ]]; then
+  run_up
   exit 0
 
 elif [[ "$1" = "build-fe" ]]; then
