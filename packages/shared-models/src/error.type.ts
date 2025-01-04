@@ -9,6 +9,8 @@ type APIErrorCode =
     | 'ERR_USER_NOT_VERIFIED'
     | 'ERR_USERNAME_PASSWORD_INVALID'
     | 'ERR_SECURITY_CONTEXT_NOT_SET'
+    | 'ERR_SHOPITEM_NOT_FOUND'
+    | 'ERR_SHOPITEM_ALREADY_EXISTS'
 
 export type APIErrorType = {
     code: APIErrorCode,

@@ -33,7 +33,43 @@ model User {
   Order Order[]
 }
 
-model Product {
+model OrderedShopItem {
+  id              Int @id @default(autoincrement())
+  priceAtPurchase Int
+  quantity        Int
+
+  //relation
+  ShopItem   ShopItem @relation(fields: [shopItemId], references: [id])
+  shopItemId Int
+  Order      Order    @relation(fields: [orderId], references: [id])
+  orderId    Int
+}
+
+model Order {
+  id         Int @id @default(autoincrement())
+  totalPrice Int
+
+  //relation
+  User   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  orderedShopItems OrderedShopItem[]
+}
+
+model Cart {
+  id Int @id @default(autoincrement())
+
+  //relation
+  User   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
+
+  shopItems ShopItem[]
+
+  // explicte many to many relation
+  // CartOnProduct CartOnProduct[]
+}
+
+model ShopItem {
   id          Int    @id @default(autoincrement())
   name        String @unique
   description String
@@ -41,34 +77,10 @@ model Product {
   quantity    Int
   price       Int
 
-  OrderedProduct OrderedProduct[]
-  Cart           Cart[]
-}
+  //relation
+  orderedShopItems OrderedShopItem[]
+  carts            Cart[]
 
-model OrderedProduct {
-  id              Int @id @default(autoincrement())
-  orderId         Int
-  productId       Int
-  priceAtPurchase Int
-
-  Product Product @relation(fields: [productId], references: [id])
-  Order   Order   @relation(fields: [orderId], references: [id])
-}
-
-model Order {
-  id     Int @id @default(autoincrement())
-  userId Int
-  price  Int
-
-  User           User             @relation(fields: [userId], references: [id])
-  OrderedProduct OrderedProduct[]
-}
-
-model Cart {
-  id        Int @id @default(autoincrement())
-  userId    Int @unique
-  productId Int
-
-  Product Product @relation(fields: [productId], references: [id])
-  User    User    @relation(fields: [userId], references: [id])
+  // explicte many to many relation
+  // cartOnShopItem  CartOnShopItem[]
 }
