@@ -8,13 +8,14 @@
     "-------- Dev scripts --------": "",
     "dev": "pnpm run prisma:dev && pnpm run prisma:generate_client && nodemon --watch 'src/**/*' --ext ts --exec 'pnpm run build:tsoa && tsc --noEmit && node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts'",
     "-------- Prod scripts --------": "",
-    "prod": "pnpm run prisma:deploy && pnpm run prisma:generate_client && pnpm run build:tsoa && tsc --noEmit && node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts",
+    "prod": "pnpm run prisma:force_push && pnpm run prisma:generate_client && pnpm run build:tsoa && tsc --noEmit && node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts",
     "-------- Build scripts --------": "",
     "build:tsoa": "tsoa spec-and-routes",
     "-------- Other scripts --------": "",
     "prisma:dev": "prisma migrate dev --name create_tables",
     "prisma:generate_client": "prisma generate",
-    "prisma:deploy": "prisma migrate deploy"
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:force_push": "prisma db push --accept-data-loss"
   },
   "dependencies": {
     "@app/shared-models": "workspace:*",
