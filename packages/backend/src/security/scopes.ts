@@ -9,6 +9,9 @@ export type SecurityScope =
     | 'user:current.write'  // write current user
     | 'token:current.read'  // read all token belong to you
     | 'token:current.write' // write all token belong to you
+    | 'shopItem:create'
+    | 'shopItem:update'
+    | 'shopItem:delete'
 
 export const API_VERIFICATION_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
     'user:current.verify',
@@ -25,6 +28,9 @@ export const ADMIN_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
     ...USER_SCOPES,
     'user.read',
     'user.write',
+    'shopItem:create',
+    'shopItem:update',
+    'shopItem:delete',
 ]);
 
 export function getScopesBasedOnUserRoleOrTokenType(userRole: UserRole, token: Token) {

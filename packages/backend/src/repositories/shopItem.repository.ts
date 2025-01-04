@@ -13,31 +13,31 @@ export class ProductRepository{
         return ProductRepository.instance;
     }
 
-    public async findAll() : Promise<Array<ShopItem>> {
-        return await PRISMA_CLIENT.shopItem.findMany({
-            include: {
-                orderedShopItems: true,
-                carts: {
-                    include: {
-                        shopItems: true
-                    }
-                }
-            }
-        });
-
-    }
-
-
-    public async findOneById(id: number): Promise<ShopItem | null> {
-        return await PRISMA_CLIENT.shopItem.findUnique({
-            where: {
-                id: id
-            },
-            include: {
-                orderedShopItems: true,
-                carts: true
-            }
-        });
-    }
+    // public async findAll() : Promise<Array<ShopItem>> {
+    //     return await PRISMA_CLIENT.shopItem.findMany({
+    //         include: {
+    //             orderedShopItems: true,
+    //             carts: {
+    //                 include: {
+    //                     shopItems: true
+    //                 }
+    //             }
+    //         }
+    //     });
+    //
+    // }
+    //
+    //
+    // public async findOneById(id: number): Promise<ShopItem | null> {
+    //     return await PRISMA_CLIENT.shopItem.findUnique({
+    //         where: {
+    //             id: id
+    //         },
+    //         include: {
+    //             orderedShopItems: true,
+    //             carts: true
+    //         }
+    //     });
+    // }
 
 }

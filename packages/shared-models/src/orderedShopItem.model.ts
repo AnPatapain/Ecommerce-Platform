@@ -1,11 +1,12 @@
-import {Product} from "./product.model";
+import {ShopItem} from "./shopItem.model";
 
-export type OrderedProduct ={
+export type OrderedShopItem ={
     id: number;
     quantity: number;
     priceAtPurchase : number;
 
     //relationship
-    productId : Product;
+    shopItemId : number;
+    orderId : number;
 }
 

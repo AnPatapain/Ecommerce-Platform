@@ -1,4 +1,5 @@
 import {ShopItem} from "@app/shared-models/src/shopItem.model";
+import {ShopItemCreationRequest, ShopItemUpdateRequest} from "@app/shared-models/src/api.type";
 
 export class MockShopItemRepository {
 
@@ -26,11 +27,15 @@ export class MockShopItemRepository {
         return [...this.shopItems];
     }
 
-    public async getById(id: number): Promise<ShopItem | null> {
+    public async findById(id: number): Promise<ShopItem | null> {
         return this.shopItems.find(item => item.id === id) || null;
     }
 
-    public async createOne(shopItemData: Omit<ShopItem, "id"|"orderedShopItems"|"carts">): Promise<ShopItem> {
+    public async findByName(name: string): Promise<ShopItem | null> {
+        return this.shopItems.find(item => item.name === name) || null;
+    }
+
+    public async createOne(shopItemData: ShopItemCreationRequest): Promise<ShopItem> {
         const newItem = {
             ...shopItemData,
             id: this.shopItems.length + 1,
@@ -41,7 +46,7 @@ export class MockShopItemRepository {
         return newItem;
     }
 
-    public async updateOne(id: number, shopItemData: Partial<Omit<ShopItem,"id">>): Promise<ShopItem | null> {
+    public async updateOne(id: number, shopItemData: ShopItemUpdateRequest): Promise<ShopItem | null> {
         const index = this.shopItems.findIndex(item => item.id === id);
         if (index === -1) return null;
 
