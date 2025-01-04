@@ -15,7 +15,6 @@ dist-ssr
 *.local
 data
 packages/backend/.env
-packages/backend/prisma/migrations
 .env
 packages/backend/tsoa
 
