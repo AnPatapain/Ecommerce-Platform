@@ -8,7 +8,7 @@
     "-------- Dev scripts --------": "",
     "dev": "vite",
     "-------- Build scripts --------": "",
-    "build": "tsc --project tsconfig.json && vite build"
+    "build": "vite build"
   },
   "dependencies": {
     "@app/shared-models": "workspace:*",
