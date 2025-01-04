@@ -1,14 +1,16 @@
 import {User} from "@app/shared-models/src/user.model.ts";
 import {APIError} from "@app/shared-models/src/error.type.ts";
+import {TokenResponse} from "@app/shared-models/src/api.type.ts";
 
 export const apiClient = {
     user: {
         getAll: (token: string): Promise<Array<User>> => sendRequest('GET', 'api/users', undefined, token),
+        getCurrent: (token: string): Promise<User> => sendRequest('GET', 'api/users/current', undefined, token),
     },
     auth: {
         signup: (data: { name: string; email: string; password: string }) =>
             sendRequest("POST", "api/auth/signup", data),
-        signin: (data: { email: string; password: string }) =>
+        signin: (data: { email: string; password: string }): Promise<TokenResponse> =>
             sendRequest("POST", "api/auth/signin", data),
     },
 }

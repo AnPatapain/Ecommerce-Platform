@@ -1,5 +1,5 @@
 import {Body, Controller, Get, NoSecurity, Post, Query, Request, Res, Route, Security, type TsoaResponse} from "tsoa";
-import {type LoginRequest, type UserCreationRequest} from "@app/shared-models/src/api.type";
+import {type LoginRequest, TokenResponse, type UserCreationRequest} from "@app/shared-models/src/api.type";
 import {UserRepository} from "../repositories/user.repository";
 import {APIErrorType} from "@app/shared-models/src/error.type";
 import {generateAndReturnToken, generatePasswordHashed, verifyPassword} from "../services/auth.service";
@@ -49,7 +49,7 @@ export class AuthController extends Controller {
     public async verifyAccount(
         @Request() req: express.Request,
         @Query() token: string
-    ) {
+    ): Promise<TokenResponse> {
         const user = getCurrentUser(req);
         await this.userRepository.updateOne(user.id, {
             verified: true,
@@ -59,10 +59,14 @@ export class AuthController extends Controller {
         await this.tokenRepository.deleteMany({userId: user.id});
 
         // Return API access token after user verification
-        return await generateAndReturnToken({
+        const apiToken = await generateAndReturnToken({
             userId: user.id,
             tokenType: 'api'
         });
+
+        return {
+            apiAccessToken: apiToken,
+        };
     }
 
     @Post('signin')
