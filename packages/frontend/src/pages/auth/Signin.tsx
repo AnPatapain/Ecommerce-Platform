@@ -6,6 +6,7 @@ import {APIError} from "@app/shared-models/src/error.type.ts";
 import {useLocation, useNavigate} from "react-router-dom";
 import {getEmailValidator} from "@app/shared-utils/src/email-validator.ts";
 import AppLink from "../../components/AppLink.tsx";
+import {toast} from "react-toastify";
 
 export default function Signin() {
     const [error, setError] = useState<string | null>(null);
@@ -42,6 +43,9 @@ export default function Signin() {
             setIsProcessing(false);
             if (err instanceof APIError) {
                 if (err.code === 'ERR_USER_NOT_VERIFIED') {
+                    toast.warn('Your email is not verified', {
+                        theme: 'dark'
+                    });
                     navigate('/send-verify-account-email');
                     return;
                 }

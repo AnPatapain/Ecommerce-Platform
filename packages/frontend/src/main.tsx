@@ -57,7 +57,7 @@ const router = createBrowserRouter([
             },
             {
                 path: 'send-verify-account-email',
-                element: <PrivateRoute><SendVerifyAccountEmail/></PrivateRoute>
+                element: <PublicRoute><SendVerifyAccountEmail/></PublicRoute>
             },
             {
                 path: 'verify-account-email',

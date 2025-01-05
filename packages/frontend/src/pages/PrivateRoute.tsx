@@ -3,8 +3,8 @@ import {Navigate, useLocation} from "react-router-dom";
 import {ReactNode} from "react";
 
 export default function PrivateRoute({ children } : { children: ReactNode }) {
-    const {currentUser} = useAuth();
+    const {token} = useAuth();
     const location = useLocation();
 
-    return currentUser ? children : <Navigate to={'/signin'} state={ {from: location} }/>;
+    return token ? children : <Navigate to={'/signin'} state={ {from: location} }/>;
 }

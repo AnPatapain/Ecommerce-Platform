@@ -1,5 +1,5 @@
 import {Alert, Button, Container, Group, TextInput} from "@mantine/core";
-import {useEffect, useState} from "react";
+import { useState} from "react";
 import {useAuth} from "../../auth.context.tsx";
 import {useForm} from "@mantine/form";
 import {toast} from "react-toastify";
@@ -14,12 +14,6 @@ export default function SendVerifyAccountEmail() {
     const [verificationRequested, setVerificationRequested] = useState<boolean>(false);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const { sendVerifyAccountEmail } = useAuth();
-
-    useEffect(() => {
-        toast.warn('Your email is not verified', {
-            theme: 'dark'
-        });
-    }, [])
 
     // Initialize Mantine form
     const form = useForm({

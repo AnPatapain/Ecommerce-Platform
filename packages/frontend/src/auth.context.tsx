@@ -42,9 +42,7 @@ export const AuthProvider = ({children}: { children: any }) => {
 
     const signup = async (name: string, email: string, password: string): Promise<SignupSuccessResponse> => {
         try {
-            const response = await apiClient.auth.signup({name, email, password});
-            setCurrentUser(response.createdUser);
-            return response;
+            return await apiClient.auth.signup({name, email, password});
         } catch (error) {
             throw error;
         }
