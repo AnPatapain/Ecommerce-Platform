@@ -17,6 +17,10 @@ export const API_VERIFICATION_SCOPES: Set<SecurityScope> = new Set<SecurityScope
     'user:current.verify',
 ]);
 
+export const RESET_PASSWORD_TOKEN: Set<SecurityScope> = new Set<SecurityScope>([
+    'user:current.write',
+])
+
 export const USER_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
     'user:current.read',
     'user:current.write',
@@ -36,10 +40,15 @@ export const ADMIN_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
 export function getScopesBasedOnUserRoleOrTokenType(userRole: UserRole, token: Token) {
     if (userRole === 'user') {
         if (token.tokenType === 'account_verification') return API_VERIFICATION_SCOPES;
+
+        else if (token.tokenType === 'reset_password') return RESET_PASSWORD_TOKEN;
+
         return USER_SCOPES;
-    } else if (userRole === 'admin') {
+    }
+    else if (userRole === 'admin') {
         return ADMIN_SCOPES;
-    } else {
+    }
+    else {
         return USER_SCOPES;
     }
 }

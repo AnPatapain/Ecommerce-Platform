@@ -1,7 +1,8 @@
-import {Alert, Anchor, Container} from "@mantine/core";
+import {Alert, Container} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {useAuth} from "../../auth.context.tsx";
 import {APIError} from "@app/shared-models/src/error.type.ts";
+import AppLink from "../../components/AppLink.tsx";
 
 export default function VerifyAccountEmailDone() {
     const [error, setError] = useState<string | null>(null);
@@ -24,7 +25,7 @@ export default function VerifyAccountEmailDone() {
                         return;
                     }
                 }
-                setError(error.toString());
+                setError("Unexpected error occurred");
             }
         }
 
@@ -40,7 +41,7 @@ export default function VerifyAccountEmailDone() {
                         <Alert color="red" mt="md" mb={'xl'}>
                             {error}
                         </Alert>
-                        <Anchor underline='always' href={'/send-verify-account-email'}>Get new code</Anchor>
+                        <AppLink href={'/send-verify-account-email'}>Get new code</AppLink>
                     </>
                 )
             }

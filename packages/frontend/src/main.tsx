@@ -6,7 +6,7 @@ import {createBrowserRouter, Outlet, RouterProvider} from "react-router-dom";
 import {Home} from "./pages/Home.tsx";
 import ErrorPage from "./pages/ErrorPage.tsx";
 import Root from "./pages/Root.tsx";
-import Design from "./pages/Design.tsx";
+import Draft from "./pages/Draft.tsx";
 import HorizontalNav from "./components/HorizontalNav.tsx";
 import Signin from "./pages/auth/Signin.tsx";
 import {AuthProvider} from "./auth.context.tsx";
@@ -14,6 +14,11 @@ import Signup from "./pages/auth/Signup.tsx";
 import SendVerifyAccountEmail from "./pages/auth/SendVerifyAccountEmail.tsx";
 import {ToastContainer} from "react-toastify";
 import VerifyAccountEmailDone from "./pages/auth/VerifyAccountEmailDone.tsx";
+import ForgotPassword from "./pages/auth/ForgotPassword.tsx";
+import ResetPassword from "./pages/auth/ResetPassword.tsx";
+import PrivateRoute from "./pages/PrivateRoute.tsx";
+import PublicRoute from "./pages/PublicRoute.tsx";
+import OrderProduct from "./pages/OrderProduct.tsx";
 
 
 const router = createBrowserRouter([
@@ -27,35 +32,48 @@ const router = createBrowserRouter([
         errorElement: <ErrorPage/>,
         children: [
             {
-                path: '',
-                element: <Root/>,
-                errorElement: <ErrorPage/>,
+                path: "",
+                element: (
+                    <Root />
+                ),
                 children: [
                     {
-                        path: 'home',
-                        element: <Home/>,
+                        path: "",
+                        element: <Home />,
                     },
                     {
-                        path: 'signin',
-                        element: <Signin/>,
-                    },
-                    {
-                        path: 'signup',
-                        element: <Signup/>
-                    },
-                    {
-                        path: 'send-verify-account-email',
-                        element: <SendVerifyAccountEmail/>
-                    },
-                    {
-                        path: 'verify-account-email',
-                        element: <VerifyAccountEmailDone/>
+                        path: "order-product",
+                        element: <PrivateRoute><OrderProduct/></PrivateRoute>
                     }
-                ]
+                ],
             },
             {
-                path: '/design',
-                element: <Design/>,
+                path: 'signin',
+                element: <PublicRoute><Signin/></PublicRoute>,
+            },
+            {
+                path: 'signup',
+                element: <PublicRoute><Signup/></PublicRoute>
+            },
+            {
+                path: 'send-verify-account-email',
+                element: <PrivateRoute><SendVerifyAccountEmail/></PrivateRoute>
+            },
+            {
+                path: 'verify-account-email',
+                element: <PublicRoute><VerifyAccountEmailDone/></PublicRoute>
+            },
+            {
+                path: 'forgot-password',
+                element: <PublicRoute><ForgotPassword/></PublicRoute>
+            },
+            {
+                path: 'reset-password',
+                element: <PublicRoute><ResetPassword/></PublicRoute>
+            },
+            {
+                path: '/draft',
+                element: <Draft/>,
                 children: [
                     {
                         path: 'header',

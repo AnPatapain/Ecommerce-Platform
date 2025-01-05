@@ -9,4 +9,4 @@ export interface Token {
 
 export type TokenCreationData = Omit<Token, 'id' | 'hash' | 'createdAt' | 'expiredAt'>;
 
-export type TokenType = 'api' | 'account_verification';
+export type TokenType = 'api' | 'account_verification' | 'reset_password';

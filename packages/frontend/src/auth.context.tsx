@@ -2,23 +2,25 @@ import {User} from "@app/shared-models/src/user.model.ts";
 import {createContext, useContext, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {apiClient} from "./api-client.ts";
-import { MailVerificationResponse} from "@app/shared-models/src/api.type.ts";
+import {APISuccessResponse, MailVerificationResponse, SignupSuccessResponse} from "@app/shared-models/src/api.type.ts";
 
 const API_KEY_LOCALSTORAGE_KEY = 'x-api-key';
 
 interface AuthContextType {
     currentUser: User | null;
     token: string | null;
-    signup: (email: string, name: string, password: string) => Promise<MailVerificationResponse>;
+    signup: (email: string, name: string, password: string) => Promise<SignupSuccessResponse>;
     signin: (email: string, password: string) => Promise<void>;
     signout: () => void;
     sendVerifyAccountEmail: (email: string) => Promise<MailVerificationResponse>;
-    verifyAccountEmail: (token: string) => Promise<void>;
+    verifyAccountEmail: (verifyAccountToken: string) => Promise<void>;
+    sendResetPasswordEmail: (email: string) => Promise<MailVerificationResponse>;
+    resetPassword: (resetPasswordToken: string, newPassword: string) => Promise<APISuccessResponse>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider = ({ children } : {children: any}) => {
+export const AuthProvider = ({children}: { children: any }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem(API_KEY_LOCALSTORAGE_KEY));
     const navigate = useNavigate();
@@ -38,9 +40,11 @@ export const AuthProvider = ({ children } : {children: any}) => {
         fetchCurrentUser();
     }, [token]);
 
-    const signup = async (name: string, email: string, password: string): Promise<MailVerificationResponse> => {
+    const signup = async (name: string, email: string, password: string): Promise<SignupSuccessResponse> => {
         try {
-            return await apiClient.auth.signup({name, email, password});
+            const response = await apiClient.auth.signup({name, email, password});
+            setCurrentUser(response.createdUser);
+            return response;
         } catch (error) {
             throw error;
         }
@@ -48,14 +52,12 @@ export const AuthProvider = ({ children } : {children: any}) => {
 
     const signin = async (email: string, password: string): Promise<void> => {
         try {
-            const response = await apiClient.auth.signin({ email, password });
+            const response = await apiClient.auth.signin({email, password});
             localStorage.setItem(API_KEY_LOCALSTORAGE_KEY, response.apiAccessToken);
             setToken(response.apiAccessToken);
 
             const user = await apiClient.user.getCurrent(response.apiAccessToken);
             setCurrentUser(user);
-
-            navigate("/");
         } catch (error) {
             throw error;
         }
@@ -65,20 +67,20 @@ export const AuthProvider = ({ children } : {children: any}) => {
         localStorage.removeItem(API_KEY_LOCALSTORAGE_KEY);
         setToken(null);
         setCurrentUser(null);
-        navigate("/signin");
+        navigate("/");
     };
 
     const sendVerifyAccountEmail = async (email: string): Promise<MailVerificationResponse> => {
         try {
             return await apiClient.auth.sendVerifyAccountEmail(email);
-        } catch(error) {
+        } catch (error) {
             throw error;
         }
     }
 
-    const verifyAccountEmail = async (token: string): Promise<void> => {
+    const verifyAccountEmail = async (verifyToken: string): Promise<void> => {
         try {
-            const verifyResponse = await apiClient.auth.verifyAccount(token);
+            const verifyResponse = await apiClient.auth.verifyAccount(verifyToken);
             const apiAccessToken = verifyResponse.apiAccessToken;
             localStorage.setItem(API_KEY_LOCALSTORAGE_KEY, apiAccessToken);
             setToken(apiAccessToken);
@@ -87,12 +89,42 @@ export const AuthProvider = ({ children } : {children: any}) => {
             setCurrentUser(user);
 
             navigate("/");
-        } catch(error) {
+        } catch (error) {
             throw error;
         }
     }
 
-    return <AuthContext.Provider value={{currentUser, token, signup, signin, signout, sendVerifyAccountEmail, verifyAccountEmail}}>
+    const sendResetPasswordEmail = async (email: string): Promise<MailVerificationResponse> => {
+        try {
+            return await apiClient.auth.sendResetPasswordEmail(email);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    const resetPassword = async (
+        resetPasswordToken: string,
+        newPassword: string
+    ): Promise<APISuccessResponse> => {
+        try {
+            return await apiClient.auth.resetPassword(resetPasswordToken, {newPassword: newPassword});
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    return <AuthContext.Provider
+        value={{
+            currentUser,
+            token,
+            signup,
+            signin,
+            signout,
+            sendVerifyAccountEmail,
+            verifyAccountEmail,
+            sendResetPasswordEmail,
+            resetPassword
+        }}>
         {children}
     </AuthContext.Provider>
 }

@@ -1,6 +1,6 @@
 import HorizontalNav from "../components/HorizontalNav.tsx";
 
-export default function Design() {
+export default function Draft() {
 
     return (
         <HorizontalNav/>

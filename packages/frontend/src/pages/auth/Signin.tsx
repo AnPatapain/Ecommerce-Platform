@@ -1,15 +1,21 @@
 import { useState } from "react";
 import { useAuth } from "../../auth.context.tsx";
 import { useForm } from "@mantine/form";
-import {TextInput, PasswordInput, Button, Group, Alert, Container, Anchor} from "@mantine/core";
+import {TextInput, PasswordInput, Button, Group, Alert, Container} from "@mantine/core";
 import {APIError} from "@app/shared-models/src/error.type.ts";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {getEmailValidator} from "@app/shared-utils/src/email-validator.ts";
+import AppLink from "../../components/AppLink.tsx";
 
 export default function Signin() {
     const [error, setError] = useState<string | null>(null);
     const { signin } = useAuth();
     const navigate = useNavigate();
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+    // Get the "from" location or default to "/". It were set in PrivateRoute
+    const location = useLocation(); // Access location state
+    const from = location.state?.from?.pathname || "/";
 
     // Initialize Mantine form
     const form = useForm({
@@ -27,11 +33,17 @@ export default function Signin() {
     const handleSubmit = async (values: { email: string; password: string }) => {
         setError(null);
         try {
+            setIsProcessing(true);
             await signin(values.email, values.password);
+            setIsProcessing(false);
+            // Redirect to the original page or home page. Replace ensures that signin page is removed from browser history stack
+            navigate(from, { replace: true });
         } catch (err: any) {
+            setIsProcessing(false);
             if (err instanceof APIError) {
                 if (err.code === 'ERR_USER_NOT_VERIFIED') {
                     navigate('/send-verify-account-email');
+                    return;
                 }
             }
             setError(err.toString());
@@ -64,10 +76,10 @@ export default function Signin() {
                 )}
 
                 <Group justify="" mt="md" mb={'md'}>
-                    <Button type="submit" variant='filled'>Sign In</Button>
-                    <Anchor underline='always' href={'/forgot-password'}>Forgot password?</Anchor>
+                    <Button loading={isProcessing} loaderProps={{type: 'dots'}} type="submit" variant='filled'>Sign In</Button>
+                    <AppLink href={'/forgot-password'}>Forgot password?</AppLink>
                 </Group>
-                <Anchor underline='always' href={'/signup'}>Don't have an account? Register now</Anchor>
+                <AppLink href={'/signup'}>Don't have an account? Register now</AppLink>
             </form>
         </Container>
     );

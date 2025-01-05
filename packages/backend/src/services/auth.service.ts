@@ -7,12 +7,15 @@ import {CONFIG} from "../backend-config";
 
 const API_TOKEN_DURATION = 10 * DAY_MS;
 const VERIFICATION_TOKEN_DURATION = HOUR_MS;
+const RESET_PASSWORD_TOKEN_DURATION = HOUR_MS;
 
 function getTokenDuration(tokenType: TokenType): number {
     if (tokenType === 'api') {
         return API_TOKEN_DURATION;
     } else if (tokenType === 'account_verification') {
         return VERIFICATION_TOKEN_DURATION;
+    } else if (tokenType === 'reset_password') {
+        return RESET_PASSWORD_TOKEN_DURATION;
     } else {
         return API_TOKEN_DURATION;
     }
@@ -40,12 +43,14 @@ export async function generateAndReturnToken(tokenCreationData: TokenCreationDat
         .digest('hex');
 
     const tokenRepo = TokenRepository.getInstance();
+    // Each type of token has different expiration date
+    const tokenExpirationDate = new Date(new Date().getTime() + getTokenDuration(tokenCreationData.tokenType))
     await tokenRepo.createOne({
         hash: hashedToken,
         userId: tokenCreationData.userId,
         tokenType: tokenCreationData.tokenType,
         createdAt: new Date(),
-        expiredAt: new Date(new Date().getTime() + getTokenDuration(tokenCreationData.tokenType)),
+        expiredAt: tokenExpirationDate,
     })
     return rawToken;
 }

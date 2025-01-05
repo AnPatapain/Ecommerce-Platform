@@ -3,6 +3,8 @@ import { useDisclosure } from '@mantine/hooks';
 import classes from './HorizontalNav.module.css';
 import {useAuth} from "../auth.context.tsx";
 import {User} from "@app/shared-models/src/user.model.ts";
+import AppLink from "./AppLink.tsx";
+import {useNavigate} from "react-router-dom";
 
 function getLinksForNavBar(user: User | null) {
     if(user) {
@@ -31,6 +33,7 @@ export default function HorizontalNav() {
     const {currentUser, signout} = useAuth();
 
     const links = getLinksForNavBar(currentUser);
+    const navigate = useNavigate();
 
     const items = links.map((link) => {
         const menuItems = link.links?.map((item) => (
@@ -71,6 +74,10 @@ export default function HorizontalNav() {
                 key={link.label}
                 href={link.link}
                 className={classes.link}
+                onClick={(event: any) => {
+                    event.preventDefault();
+                    navigate(link.link);
+                }}
             >
                 {link.label}
             </a>
@@ -81,7 +88,9 @@ export default function HorizontalNav() {
         <header className={classes.header}>
             <Container size="md">
                 <div className={classes.inner}>
-                    <h3>ECM</h3>
+                    <AppLink underline={false} href={'/'}>
+                        <h3>ECM</h3>
+                    </AppLink>
                     <Group gap={5} visibleFrom="sm">
                         {items}
                     </Group>

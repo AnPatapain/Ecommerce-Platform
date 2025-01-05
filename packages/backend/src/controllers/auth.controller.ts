@@ -1,9 +1,11 @@
 import {Body, Controller, Get, NoSecurity, Post, Query, Request, Res, Route, Security, type TsoaResponse} from "tsoa";
 import {
-    type LoginRequest,
-    APITokenResponse,
-    type UserCreationRequest,
-    MailVerificationResponse
+    type SigninRequest,
+    type APITokenResponse,
+    type SignupRequest,
+    type MailVerificationResponse,
+    type APISuccessResponse,
+    type ResetPasswordRequest, SignupSuccessResponse
 } from "@app/shared-models/src/api.type";
 import {UserRepository} from "../repositories/user.repository";
 import {APIErrorType} from "@app/shared-models/src/error.type";
@@ -11,7 +13,7 @@ import {generateAndReturnToken, generatePasswordHashed, verifyPassword} from "..
 import {sendEmail} from "../services/mail.service";
 import express from "express";
 import {User} from "@app/shared-models/src/user.model";
-import {VERIFICATION_EMAIL_TEMPLATE} from "../utils/email-template";
+import {RESET_PASSWORD_TEMPLATE, VERIFICATION_EMAIL_TEMPLATE} from "../utils/email-template";
 import {CONFIG} from "../backend-config";
 import {TokenRepository} from "../repositories/token.repository";
 import {getCurrentUser} from "../security/auth.handler";
@@ -24,9 +26,9 @@ export class AuthController extends Controller {
     @Post('signup')
     @NoSecurity()
     public async signup(
-        @Body() requestBody: UserCreationRequest,
+        @Body() requestBody: SignupRequest,
         @Res() errUserAlreadyExisted: TsoaResponse<409, APIErrorType>
-    ): Promise<MailVerificationResponse> {
+    ): Promise<SignupSuccessResponse> {
         const user = await this.userRepository.findByEmail(requestBody.email);
         if (user) {
             throw errUserAlreadyExisted(409, {
@@ -59,11 +61,10 @@ export class AuthController extends Controller {
         if (!user) {
             throw errUserNotFound(404, {
                 code: 'ERR_USER_NOT_FOUND'
-            })
+            });
         }
         const mailPreviewUrl = await this._sendVerificationEmail(user);
         return {
-            createdUser: user,
             mailPreviewUrl: mailPreviewUrl
         };
     }
@@ -96,7 +97,7 @@ export class AuthController extends Controller {
     @Post('signin')
     @NoSecurity()
     public async signin(
-        @Body() requestBody: LoginRequest,
+        @Body() requestBody: SigninRequest,
         @Res() errUsernameOrPasswordInvalid: TsoaResponse<401, APIErrorType>,
         @Res() errUserNotVerified: TsoaResponse<401, APIErrorType>
     ) : Promise<APITokenResponse> {
@@ -122,6 +123,37 @@ export class AuthController extends Controller {
         };
     }
 
+    @Get('send-reset-password-email')
+    public async sendResetPasswordEmail(
+        @Query() email: string,
+        @Res() errUserNotFound: TsoaResponse<404, APIErrorType>,
+    ): Promise<MailVerificationResponse> {
+        const user = await this.userRepository.findByEmail(email);
+        if (!user) {
+            throw errUserNotFound(404, {
+                code: 'ERR_USER_NOT_FOUND'
+            });
+        }
+        const mailPreviewUrl = await this._sendResetPasswordEmail(user);
+        return {
+            mailPreviewUrl: mailPreviewUrl
+        };
+    }
+
+    @Post('reset-password')
+    @Security('token', ['user:current.write'])
+    public async resetPassword(
+        @Request() req: express.Request,
+        @Body() requestBody: ResetPasswordRequest,
+    ): Promise<APISuccessResponse> {
+        const currentUser = getCurrentUser(req);
+        const newHashedPassword = generatePasswordHashed(requestBody.newPassword);
+        await this.userRepository.updateOne(currentUser.id, {password: newHashedPassword});
+        return {
+            success: true
+        };
+    }
+
     ////////////////////
     // Private methods
     private async _sendVerificationEmail(user: User): Promise<string> {
@@ -137,6 +169,22 @@ export class AuthController extends Controller {
             'Verify account',
             `Click this link to verify account: ${verificationEndpoint}`,
             VERIFICATION_EMAIL_TEMPLATE(verificationEndpoint)
+        );
+    }
+
+    private async _sendResetPasswordEmail(user: User): Promise<string> {
+        const resetPasswordToken = await generateAndReturnToken({
+            tokenType: 'reset_password',
+            userId: user.id,
+        })
+
+        const resetPasswordEndpoint = `${CONFIG.PUBLIC_URL}/reset-password?token=${resetPasswordToken}&email=${user.email}`;
+
+        return await sendEmail(
+            user.email,
+            'Reset password',
+            `Click this link to reset password: ${resetPasswordEndpoint}`,
+            RESET_PASSWORD_TEMPLATE(resetPasswordEndpoint),
         );
     }
 }

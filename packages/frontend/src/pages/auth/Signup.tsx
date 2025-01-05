@@ -1,16 +1,18 @@
 import {useState} from "react";
 import {useAuth} from "../../auth.context.tsx";
 import {useForm} from "@mantine/form";
-import {Alert, Anchor, Button, Container, Group, PasswordInput, TextInput} from "@mantine/core";
-import {MailVerificationResponse} from "@app/shared-models/src/api.type.ts";
+import {Alert, Button, Container, Group, PasswordInput, TextInput} from "@mantine/core";
 import {toast} from "react-toastify";
 import {getEmailValidator} from "@app/shared-utils/src/email-validator.ts";
+import {APIError} from "@app/shared-models/src/error.type.ts";
+import AppLink from "../../components/AppLink.tsx";
 
 export default function Signup() {
     const [error, setError] = useState<string | null>(null);
-    const [verificationNoti, setVerificationNoti] = useState<{message: string, mailBox: string} | null>(null);
+    const [verificationNoti, setVerificationNoti] = useState<{ message: string, mailBox: string } | null>(null);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const [signupDone, setSignupDone] = useState<boolean>(false);
-    const { signup } = useAuth();
+    const {signup} = useAuth();
 
     // Initialize Mantine form
     const form = useForm({
@@ -18,27 +20,42 @@ export default function Signup() {
             name: "",
             email: "",
             password: "",
+            confirmedPassword: "",
         },
         validate: {
             email: (value) => (getEmailValidator().test(value) ? null : "Invalid email"),
             password: (value) =>
                 value.length >= 6 ? null : "Password must be at least 6 characters",
+            confirmedPassword: (value) =>
+                value.length >= 6 ? null : "Password must be at least 6 characters",
         },
     });
 
-    const handleSubmit = async (values: { name: string, email: string; password: string }) => {
+    const handleSubmit = async (values: {
+        name: string,
+        email: string;
+        password: string,
+        confirmedPassword: string
+    }) => {
         setError(null);
 
         try {
-            const response: MailVerificationResponse = await signup(values.name, values.email, values.password);
+            if (values.password !== values.confirmedPassword) throw new Error('Confirm password does not match');
+            setIsProcessing(true);
+            const response = await signup(values.name, values.email, values.password);
+            setIsProcessing(false);
             setSignupDone(true);
             toast.info('Account verification email successfully sent to fake SMTP mailbox');
             setVerificationNoti({
-                message: `Please verify your email ${response.createdUser.email} at this pre-configured fake SMTP mailbox:`,
+                message: `Please verify your email ${values.email} at this fake SMTP mailbox:`,
                 mailBox: response.mailPreviewUrl
             });
         } catch (err: any) {
-            console.log(err);
+            setIsProcessing(false);
+            if (err instanceof APIError) {
+                setError(err.toString());
+                return;
+            }
             setError(err.toString());
         }
     };
@@ -69,6 +86,14 @@ export default function Signup() {
                     {...form.getInputProps("password")}
                 />
 
+                <PasswordInput
+                    withAsterisk
+                    label="Confirm password"
+                    placeholder="Your password"
+                    mt="md"
+                    {...form.getInputProps("confirmedPassword")}
+                />
+
                 {error && (
                     <Alert color="red" mt="md">
                         {error}
@@ -76,15 +101,15 @@ export default function Signup() {
                 )}
 
                 <Group justify="" mt="md">
-                    <Button type="submit" variant='filled' disabled={signupDone}>Sign Up</Button>
-                    <Anchor underline='always' href={'/signin'}>Back to sign in</Anchor>
+                    <Button loading={isProcessing} loaderProps={{type: 'dots'}} type="submit" variant='filled' disabled={signupDone}>Sign Up</Button>
+                    <AppLink href={'/signin'} >Back to sign in</AppLink>
                 </Group>
                 {
                     verificationNoti && (
                         <Alert variant="light" color="blue" title="Notification">
                             {verificationNoti.message}
                             <br/>
-                            <Anchor underline='always' href={verificationNoti.mailBox} target='_blank'>{verificationNoti.mailBox}</Anchor>
+                            <AppLink href={verificationNoti.mailBox} openInNewTab={true}>{verificationNoti.mailBox}</AppLink>
                         </Alert>
                     )
                 }

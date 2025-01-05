@@ -1,6 +1,11 @@
 import {User} from "@app/shared-models/src/user.model.ts";
 import {APIError} from "@app/shared-models/src/error.type.ts";
-import {APITokenResponse, MailVerificationResponse} from "@app/shared-models/src/api.type.ts";
+import {
+    APITokenResponse,
+    SigninRequest,
+    MailVerificationResponse,
+    SignupRequest, ResetPasswordRequest, APISuccessResponse, SignupSuccessResponse
+} from "@app/shared-models/src/api.type.ts";
 
 export const apiClient = {
     user: {
@@ -8,15 +13,18 @@ export const apiClient = {
         getCurrent: (token: string): Promise<User> => sendRequest('GET', 'api/users/current', undefined, token),
     },
     auth: {
-        signup: (data: { name: string; email: string; password: string }): Promise<MailVerificationResponse> =>
+        signup: (data: SignupRequest): Promise<SignupSuccessResponse> =>
             sendRequest("POST", "api/auth/signup", data),
-        signin: (data: { email: string; password: string }): Promise<APITokenResponse> =>
+        signin: (data: SigninRequest): Promise<APITokenResponse> =>
             sendRequest("POST", "api/auth/signin", data),
         sendVerifyAccountEmail: (email: string): Promise<MailVerificationResponse> =>
             sendRequest("GET", `api/auth/send-verification-mail?email=${email}`),
         verifyAccount: (token: string): Promise<APITokenResponse> =>
             sendRequest("GET", `api/auth/verify?token=${token}`),
-
+        sendResetPasswordEmail: (email: string): Promise<MailVerificationResponse> =>
+            sendRequest("GET", `api/auth/send-reset-password-email?email=${email}`),
+        resetPassword: (resetPasswordToken: string, data: ResetPasswordRequest): Promise<APISuccessResponse> =>
+            sendRequest("POST", `api/auth/reset-password`, data, resetPasswordToken),
     },
 }
 
