@@ -8,8 +8,12 @@ import ErrorPage from "./pages/ErrorPage.tsx";
 import Root from "./pages/Root.tsx";
 import Design from "./pages/Design.tsx";
 import HorizontalNav from "./components/HorizontalNav.tsx";
-import Signin from "./pages/Signin.tsx";
+import Signin from "./pages/auth/Signin.tsx";
 import {AuthProvider} from "./auth.context.tsx";
+import Signup from "./pages/auth/Signup.tsx";
+import SendVerifyAccountEmail from "./pages/auth/SendVerifyAccountEmail.tsx";
+import {ToastContainer} from "react-toastify";
+import VerifyAccountEmailDone from "./pages/auth/VerifyAccountEmailDone.tsx";
 
 
 const router = createBrowserRouter([
@@ -34,6 +38,18 @@ const router = createBrowserRouter([
                     {
                         path: 'signin',
                         element: <Signin/>,
+                    },
+                    {
+                        path: 'signup',
+                        element: <Signup/>
+                    },
+                    {
+                        path: 'send-verify-account-email',
+                        element: <SendVerifyAccountEmail/>
+                    },
+                    {
+                        path: 'verify-account-email',
+                        element: <VerifyAccountEmailDone/>
                     }
                 ]
             },
@@ -53,8 +69,17 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-        <MantineProvider>
+        <MantineProvider
+            theme={{
+                colors: {
+                    // Define your own color palette
+                    primary: ['#000000', '#000000', '#000000', '#000000', '#000000', '#000000', '#000000', '#000000', '#000000', '#000000'],
+                },
+                primaryColor: 'primary',
+            }}
+        >
             <RouterProvider router={router}/>
+            <ToastContainer />
         </MantineProvider>
     </React.StrictMode>,
 )

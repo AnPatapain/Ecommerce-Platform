@@ -1,11 +1,15 @@
 import { useState } from "react";
-import { useAuth } from "../auth.context.tsx";
+import { useAuth } from "../../auth.context.tsx";
 import { useForm } from "@mantine/form";
-import {TextInput, PasswordInput, Button, Group, Alert, Container} from "@mantine/core";
+import {TextInput, PasswordInput, Button, Group, Alert, Container, Anchor} from "@mantine/core";
+import {APIError} from "@app/shared-models/src/error.type.ts";
+import {useNavigate} from "react-router-dom";
+import {getEmailValidator} from "@app/shared-utils/src/email-validator.ts";
 
 export default function Signin() {
     const [error, setError] = useState<string | null>(null);
     const { signin } = useAuth();
+    const navigate = useNavigate();
 
     // Initialize Mantine form
     const form = useForm({
@@ -14,7 +18,7 @@ export default function Signin() {
             password: "",
         },
         validate: {
-            email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
+            email: (value) => (getEmailValidator().test(value) ? null : "Invalid email"),
             password: (value) =>
                 value.length >= 6 ? null : "Password must be at least 6 characters",
         },
@@ -22,12 +26,15 @@ export default function Signin() {
 
     const handleSubmit = async (values: { email: string; password: string }) => {
         setError(null);
-
         try {
             await signin(values.email, values.password);
         } catch (err: any) {
-            console.log(err);
-            setError("Invalid credentials. Please try again.");
+            if (err instanceof APIError) {
+                if (err.code === 'ERR_USER_NOT_VERIFIED') {
+                    navigate('/send-verify-account-email');
+                }
+            }
+            setError(err.toString());
         }
     };
 
@@ -56,9 +63,11 @@ export default function Signin() {
                     </Alert>
                 )}
 
-                <Group justify="" mt="md">
-                    <Button type="submit">Sign In</Button>
+                <Group justify="" mt="md" mb={'md'}>
+                    <Button type="submit" variant='filled'>Sign In</Button>
+                    <Anchor underline='always' href={'/forgot-password'}>Forgot password?</Anchor>
                 </Group>
+                <Anchor underline='always' href={'/signup'}>Don't have an account? Register now</Anchor>
             </form>
         </Container>
     );

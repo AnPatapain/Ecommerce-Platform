@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "-------- Dev scripts --------": "",
-    "dev": "pnpm run prisma:dev && pnpm run prisma:generate_client && nodemon --watch 'src/**/*' --ext ts --exec 'pnpm run build:tsoa && tsc --noEmit && node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts'",
+    "dev": "pnpm run prisma:force_push && pnpm run prisma:generate_client && nodemon --watch 'src/**/*' --ext ts --exec 'pnpm run build:tsoa && tsc --noEmit && node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts'",
     "-------- Prod scripts --------": "",
     "prod": "pnpm run prisma:force_push && pnpm run prisma:generate_client && pnpm run build:tsoa && tsc --noEmit && node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts",
     "-------- Build scripts --------": "",

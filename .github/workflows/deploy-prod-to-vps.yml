@@ -29,7 +29,7 @@ jobs:
 
       # Build the frontend
       - name: Build frontend static files
-        run: ./infrastructure/entrypoint build-fe
+        run: ./runner build-fe
 
       - name: Configure SSH to VPS server
         run: |
@@ -103,7 +103,7 @@ jobs:
         run: |
           ssh VPS_SERVER << EOF
             cd ~/Ecommerce-Platform
-            ./infrastructure/entrypoint prod
+            ./runner prod
           EOF
 
       - name: Restart Nginx

@@ -41,22 +41,22 @@ POSTGRES_DB=<database>
 DATABASE_URL="postgresql://<username>:<password>@postgres-db:5432/<database>?schema=public"
 HMAC_SECRET=<your secret string>
 ```
-From root project, `./infrastructure/run.sh` is the entry point
+From root project, `./runner` is the entry point
 command to run different environments: development, production, test,
 reset environment, etc.
 #### Manual
-To see all options of the command `./infrastructure/run.sh` run:
+To see all options of the command `./runner` run:
 ``` bash
-./infrastructure/run.sh --help
+./runner --help
 ```
 #### Check prerequisite installed
 To list all prerequisite. Run:
 ``` bash
-./infrastructure/run.sh list-prerequisite
+./runner list-prerequisite
 ```
 To check prerequisite on your environment. Run:
 ``` bash
-./infrastructure/run.sh prerequisite
+./runner prerequisite
 ```
 #### Development
 In development mode:
@@ -68,7 +68,7 @@ In development mode:
 
 To run development mode
 ``` bash
-./infrastructure/run.sh dev
+./runner dev
 ```
 #### Production (Not work for now)
 In production mode:
@@ -77,18 +77,18 @@ In production mode:
 
 To run application in production mode
 ``` bash
-./infrastructure/run.sh prod
+./runner prod
 ```
 #### Clean
 To clean application environment.
 ``` bash
-./infrastructure/run.sh clean
+./runner clean
 ```
-Best practice: Always run ```./infrastructure/run.sh clean``` before running
-```./infrastructure/run.sh dev``` and ```./infrastructure/run.sh prod```
+Best practice: Always run ```./runner clean``` before running
+```./runner dev``` and ```./runner prod```
 
 #### Install package
-Best practice: Run `./infrastructure/run.sh clean` before running any below commands
+Best practice: Run `./runner clean` before running any below commands
 
 
 To install every dependencies listed in packages/*/package.json
@@ -117,8 +117,8 @@ Typically, workflows is around changing the model schema, to do that, you need:
 
 Note: Whenever change a model inside schema.prisma, always clean restart app:
 ```shell
-./infrastructure/entrypoint clean
-./infrastructure/entrypoint dev
+./runner clean
+./runner dev
 ```
 
 ## Architecture  

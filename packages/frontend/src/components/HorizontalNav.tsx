@@ -55,11 +55,7 @@ export default function HorizontalNav() {
             return (
                 <Menu key={link.label} trigger="hover" transitionProps={{ exitDuration: 0 }} withinPortal>
                     <Menu.Target>
-                        <Badge
-                            size="lg"
-                            variant="gradient"
-                            gradient={{ from: 'blue', to: 'blue', deg: 0 }}
-                        >
+                        <Badge size="lg">
                             <Center>
                                 <span className={classes.linkLabel}>{link.label}</span>
                             </Center>
@@ -75,7 +71,6 @@ export default function HorizontalNav() {
                 key={link.label}
                 href={link.link}
                 className={classes.link}
-                onClick={(event) => event.preventDefault()}
             >
                 {link.label}
             </a>

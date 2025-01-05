@@ -1,5 +1,10 @@
 import {Body, Controller, Get, NoSecurity, Post, Query, Request, Res, Route, Security, type TsoaResponse} from "tsoa";
-import {type LoginRequest, TokenResponse, type UserCreationRequest} from "@app/shared-models/src/api.type";
+import {
+    type LoginRequest,
+    APITokenResponse,
+    type UserCreationRequest,
+    MailVerificationResponse
+} from "@app/shared-models/src/api.type";
 import {UserRepository} from "../repositories/user.repository";
 import {APIErrorType} from "@app/shared-models/src/error.type";
 import {generateAndReturnToken, generatePasswordHashed, verifyPassword} from "../services/auth.service";
@@ -21,7 +26,7 @@ export class AuthController extends Controller {
     public async signup(
         @Body() requestBody: UserCreationRequest,
         @Res() errUserAlreadyExisted: TsoaResponse<409, APIErrorType>
-    ) {
+    ): Promise<MailVerificationResponse> {
         const user = await this.userRepository.findByEmail(requestBody.email);
         if (user) {
             throw errUserAlreadyExisted(409, {
@@ -44,12 +49,31 @@ export class AuthController extends Controller {
         };
     }
 
+    @Get('send-verification-mail')
+    @NoSecurity()
+    public async sendVerifyAccountEmail(
+        @Query() email: string,
+        @Res() errUserNotFound: TsoaResponse<404, APIErrorType>
+    ): Promise<MailVerificationResponse> {
+        const user = await this.userRepository.findByEmail(email);
+        if (!user) {
+            throw errUserNotFound(404, {
+                code: 'ERR_USER_NOT_FOUND'
+            })
+        }
+        const mailPreviewUrl = await this._sendVerificationEmail(user);
+        return {
+            createdUser: user,
+            mailPreviewUrl: mailPreviewUrl
+        };
+    }
+
     @Get('verify')
     @Security('token', ['user:current.verify'])
     public async verifyAccount(
         @Request() req: express.Request,
         @Query() token: string
-    ): Promise<TokenResponse> {
+    ): Promise<APITokenResponse> {
         const user = getCurrentUser(req);
         await this.userRepository.updateOne(user.id, {
             verified: true,
@@ -73,20 +97,19 @@ export class AuthController extends Controller {
     @NoSecurity()
     public async signin(
         @Body() requestBody: LoginRequest,
-        @Res() errUserAlreadyExisted: TsoaResponse<401, APIErrorType>,
+        @Res() errUsernameOrPasswordInvalid: TsoaResponse<401, APIErrorType>,
         @Res() errUserNotVerified: TsoaResponse<401, APIErrorType>
-    ) {
+    ) : Promise<APITokenResponse> {
         const user = await this.userRepository.findByEmail(requestBody.email);
         if (!user || !verifyPassword(requestBody.password, user.password)) {
-            throw errUserAlreadyExisted(401, {
+            throw errUsernameOrPasswordInvalid(401, {
                 code: 'ERR_USERNAME_PASSWORD_INVALID'
             });
         }
         if (!user.verified) {
-            const mailPreviewUrl = await this._sendVerificationEmail(user);
-            return {
-                mailPreviewUrl: mailPreviewUrl,
-            }
+            throw errUserNotVerified(401, {
+                code: 'ERR_USER_NOT_VERIFIED'
+            });
         }
 
         const token = await generateAndReturnToken({
@@ -101,13 +124,13 @@ export class AuthController extends Controller {
 
     ////////////////////
     // Private methods
-    private async _sendVerificationEmail(user: User) {
+    private async _sendVerificationEmail(user: User): Promise<string> {
         const verificationToken = await generateAndReturnToken({
             tokenType: 'account_verification',
             userId: user.id,
         });
 
-        const verificationEndpoint = `${CONFIG.PUBLIC_URL}/api/auth/verify?token=${verificationToken}`;
+        const verificationEndpoint = `${CONFIG.PUBLIC_URL}/verify-account-email?token=${verificationToken}`;
 
         return await sendEmail(
             user.email,
