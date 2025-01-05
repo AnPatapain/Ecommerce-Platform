@@ -1,12 +1,12 @@
-# docker-compose-local.yml
-# This docker compose sets up the service required in development environment.
-# Specifically, frontend is served by vite dev server with hot reloading
+# docker-compose.staging.yml
+# This docker compose sets up the services required in staging environment.
+# Specifically, it mimics the production environment by building static frontend
+# file and make nginx serve it, the backend is running without hot reloading
 # Author: Ke An Nguyen
 
 services:
-  shop-monorepo-app-dev:
-    image: shop-monorepo-image:1.0
-    container_name: shop-monorepo-app-dev
+  shop-monorepo-app-staging:
+    container_name: shop-monorepo-app-staging
     build:
       context: ..
       dockerfile_inline: |
@@ -20,11 +20,10 @@ services:
                     && apt-get clean && rm -rf /var/lib/apt/lists/*
     volumes:
       - "${ROOT_PROJECT}:${ROOT_PROJECT}:Z"
-    command: sh -c "cd ${ROOT_PROJECT} && ${DOCKER_DEV_ENTRY_CMD}"
+    command: sh -c "cd ${ROOT_PROJECT} && ${DOCKER_STAGING_ENTRY_CMD}"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
     ports:
-      - "3000:3000"
       - "8080:8080"
     user: "${DOCKER_UID}:${DOCKER_GID}"
     depends_on:
@@ -40,19 +39,20 @@ services:
     env_file:
       - "../../.env"
     volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
+      - postgres_data_staging:/var/lib/postgresql/data
 
-  shop-monorepo-nginx-dev:
-    container_name: shop-monorepo-nginx-dev
+  shop-monorepo-nginx-staging:
+    container_name: shop-monorepo-nginx-staging
     image: nginx:alpine
     volumes:
-      - "${NGINX_DEV}:/etc/nginx/conf.d/nginx-dev.conf:Z"
+      - "${ROOT_PROJECT}/packages/frontend/dist:/var/www/html"
+      - "${NGINX_STAGING}:/etc/nginx/conf.d/nginx-staging.conf:Z"
       - "${TLS_DIR}:/etc/nginx/certs"
     ports:
-     - "443:443"
-     - "80:80"
+      - "443:443"
+      - "80:80"
     depends_on:
-      - shop-monorepo-app-dev
+      - shop-monorepo-app-staging
 
 volumes:
-  postgres_data_dev:
+  postgres_data_staging:

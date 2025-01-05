@@ -26,11 +26,14 @@ KEY_FILE="private.key"
 
 # Location of nginx files
 NGINX_DEV="${ROOT_PROJECT}/infrastructure/nginx/nginx-dev.conf"
+NGINX_STAGING="${ROOT_PROJECT}/infrastructure/nginx/nginx-staging.conf"
 export NGINX_DEV
+export NGINX_STAGING
 
 # Location of docker files
 DOCKER_COMPOSE_DEV="${ROOT_PROJECT}/infrastructure/docker/docker-compose.local.yml"
 DOCKER_COMPOSE_PROD="${ROOT_PROJECT}/infrastructure/docker/docker-compose.prod.yml"
+DOCKER_COMPOSE_STAGING="${ROOT_PROJECT}/infrastructure/docker/docker-compose.staging.yml"
 
 ########################
 # Docker user privilege
@@ -109,8 +112,8 @@ check_prerequisite() {
   if ! command -v pnpm &>/dev/null; then
       echo "Result: Prerequisites are not met!"
       echo ""
-      echo "Reason: pnpm is not installed."
-      echo "To fix: please install pnpm by following the instructions at https://pnpm.io/installation."
+      echo "Reason: pnpm is not installed (pnpm is a tool for mono repository)."
+      echo "Please install pnpm using: npm install -g pnpm"
       exit 1
   fi
 
@@ -184,8 +187,8 @@ clean_app() {
     sudo rm -rf packages/backend/tsoa
     sudo rm pnpm-lock.yaml
     sudo rm -rf .pnpm-store
-    sudo docker volume remove postgres_data
-    echo "node_modules, dist, nginx config files, postgres_data volume removed successfully !"
+    sudo docker volume remove postgres_data_dev
+    echo "node_modules, dist, nginx config files, postgres_data_dev volume removed successfully !"
   fi
 }
 
@@ -232,10 +235,9 @@ run_dev() {
 
   docker compose -f "${DOCKER_COMPOSE_DEV}" build --no-cache
   docker compose -f "${DOCKER_COMPOSE_DEV}" up --remove-orphans -d
-  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f app-dev -f postgres-db -f nginx-reverse-proxy-dev # Service name not container name
+  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f shop-monorepo-app-dev -f postgres-db -f shop-monorepo-nginx-dev # Service name not container name
   docker compose -f "${DOCKER_COMPOSE_DEV}" down -t 1
 }
-
 
 run_up(){
   sync_env_files
@@ -244,6 +246,15 @@ run_up(){
   docker compose -f "${DOCKER_COMPOSE_DEV}" up --remove-orphans -d
   docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f app-dev -f postgres-db -f nginx-reverse-proxy-dev # Service name not container name
   docker compose -f "${DOCKER_COMPOSE_DEV}" down -t 1
+}
+
+run_staging() {
+  sync_env_files
+  export DOCKER_STAGING_ENTRY_CMD="pnpm i && pnpm run prod"
+  docker compose -f "${DOCKER_COMPOSE_STAGING}" build --no-cache
+  docker compose -f "${DOCKER_COMPOSE_STAGING}" up --remove-orphans -d
+  docker compose -f "${DOCKER_COMPOSE_STAGING}" logs -f shop-monorepo-app-staging -f postgres-db -f shop-monorepo-nginx-staging
+  docker compose -f "${DOCKER_COMPOSE_STAGING}" down -t 1 --volumes
 }
 
 
@@ -291,6 +302,16 @@ elif [[ "$1" = "prod" ]]; then
   clean_app --force-proceed
   run_prod
   exit 0
+
+elif [[ "$1" = "staging" ]]; then
+  check_prerequisite
+  if [[ $? -eq 0 ]]; then
+    run_build_fe
+    run_staging
+  else
+    echo "Prerequisites not met. Exiting."
+    exit 1
+  fi
 
 else
     echo 'Use --help to see available options'

@@ -1,15 +1,13 @@
 # docker-compose-prod.yml
-# This file lists the containers running the services to be run on production:
-# - app-backend-prod: Runs backend process
-# - nginx-reverse-proxy-prod: reverse proxy forwarding the /api prefix request
-#   to backend process or serves the static-built frontend files (frontend served by reverse proxy)
-#   for all other requests.
+# This docker compose sets up the service required in production environment.
+# Specifically, the frontend file is built to static file and served by nginx,
+# the database is not in container anymore but will be defined in .env file
+# in production server (my OVH server)
 # Author: Ke An Nguyen
-version: '1.29.2'
 
 services:
-  app-backend-prod:
-    container_name: app-backend-prod
+  shop-monorepo-app-prod:
+    container_name: shop-monorepo-app-prod
     build:
       context: ..
       dockerfile_inline: |
