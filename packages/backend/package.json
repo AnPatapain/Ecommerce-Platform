@@ -21,8 +21,8 @@
     "@app/shared-models": "workspace:*",
     "@app/shared-utils": "workspace:*",
 
-    "@prisma/client": "^6.1.0",
-    "prisma": "^6.1.0",
+    "@prisma/client": "6.1.0",
+    "prisma": "6.1.0",
     "ts-node": "^10.9.2",
     "@tsoa/runtime": "^6.4.0",
     "@types/bcryptjs": "^2.4.6",

@@ -14,7 +14,7 @@
 SCRIPT_DIR="$(dirname $0)"
 cd "${SCRIPT_DIR}"
 
-# Root project dir
+# UserPagesTemplate project dir
 ROOT_PROJECT="$(pwd)"
 export ROOT_PROJECT
 
