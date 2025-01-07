@@ -10,7 +10,7 @@ interface AuthContextType {
     currentUser: User | null;
     token: string | null;
     signup: (email: string, name: string, password: string) => Promise<SignupSuccessResponse>;
-    signin: (email: string, password: string) => Promise<void>;
+    signin: (email: string, password: string) => Promise<User>;
     signout: () => void;
     sendVerifyAccountEmail: (email: string) => Promise<MailVerificationResponse>;
     verifyAccountEmail: (verifyAccountToken: string) => Promise<void>;
@@ -48,7 +48,7 @@ export const AuthProvider = ({children}: { children: any }) => {
         }
     }
 
-    const signin = async (email: string, password: string): Promise<void> => {
+    const signin = async (email: string, password: string): Promise<User> => {
         try {
             const response = await apiClient.auth.signin({email, password});
             localStorage.setItem(API_KEY_LOCALSTORAGE_KEY, response.apiAccessToken);
@@ -56,6 +56,7 @@ export const AuthProvider = ({children}: { children: any }) => {
 
             const user = await apiClient.user.getCurrent(response.apiAccessToken);
             setCurrentUser(user);
+            return user;
         } catch (error) {
             throw error;
         }

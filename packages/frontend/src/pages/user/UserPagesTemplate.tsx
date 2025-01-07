@@ -1,7 +1,7 @@
-import HorizontalNav from "../components/HorizontalNav.tsx";
+import HorizontalNav from "../../components/HorizontalNav.tsx";
 import {Outlet} from "react-router-dom";
 
-export default function Root() {
+export default function UserPagesTemplate() {
     return (
         <>
             <HorizontalNav/>

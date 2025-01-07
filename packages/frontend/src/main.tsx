@@ -3,9 +3,9 @@ import { MantineProvider} from "@mantine/core";
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import {createBrowserRouter, Outlet, RouterProvider} from "react-router-dom";
-import {Home} from "./pages/Home.tsx";
+import {Home} from "./pages/user/Home.tsx";
 import ErrorPage from "./pages/ErrorPage.tsx";
-import Root from "./pages/Root.tsx";
+import UserPagesTemplate from "./pages/user/UserPagesTemplate.tsx";
 import Draft from "./pages/Draft.tsx";
 import HorizontalNav from "./components/HorizontalNav.tsx";
 import Signin from "./pages/auth/Signin.tsx";
@@ -18,7 +18,10 @@ import ForgotPassword from "./pages/auth/ForgotPassword.tsx";
 import ResetPassword from "./pages/auth/ResetPassword.tsx";
 import PrivateRoute from "./pages/PrivateRoute.tsx";
 import PublicRoute from "./pages/PublicRoute.tsx";
-import OrderProduct from "./pages/OrderProduct.tsx";
+import OrderProduct from "./pages/user/OrderProduct.tsx";
+import AdminPagesTemplate from "./pages/admin/AdminPagesTemplate.tsx";
+import ShopItems from "./pages/admin/ShopItems.tsx";
+import Orders from "./pages/admin/Oders.tsx";
 
 
 const router = createBrowserRouter([
@@ -32,9 +35,29 @@ const router = createBrowserRouter([
         errorElement: <ErrorPage/>,
         children: [
             {
+                path: "admin",
+                element: (
+                    <AdminPagesTemplate/>
+                ),
+                children: [
+                    {
+                        path: "",
+                        element: <ShopItems/>
+                    },
+                    {
+                        path: "shop-items",
+                        element: <ShopItems/>
+                    },
+                    {
+                        path: "orders",
+                        element: <Orders/>
+                    }
+                ]
+            },
+            {
                 path: "",
                 element: (
-                    <Root />
+                    <UserPagesTemplate />
                 ),
                 children: [
                     {
