@@ -35,8 +35,14 @@ export default function Signin() {
         setError(null);
         try {
             setIsProcessing(true);
-            await signin(values.email, values.password);
+            const user= await signin(values.email, values.password);
             setIsProcessing(false);
+
+            if (user.role === 'admin') {
+                navigate('/admin', {replace: true});
+                return;
+            }
+
             // Redirect to the original page or home page. Replace ensures that signin page is removed from browser history stack
             navigate(from, { replace: true });
         } catch (err: any) {

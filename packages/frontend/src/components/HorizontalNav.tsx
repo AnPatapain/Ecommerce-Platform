@@ -5,6 +5,7 @@ import {useAuth} from "../auth.context.tsx";
 import {User} from "@app/shared-models/src/user.model.ts";
 import AppLink from "./AppLink.tsx";
 import {useNavigate} from "react-router-dom";
+import {toast} from "react-toastify";
 
 function getLinksForNavBar(user: User | null) {
     if(user) {
@@ -44,7 +45,8 @@ export default function HorizontalNav() {
                         label={item.label}
                         onClick={(event) => {
                             event.preventDefault();
-                            signout()
+                            signout();
+                            toast.success('Logout successfully!');
                         }}
                     /> : <NavLink
                         href={item.link}
