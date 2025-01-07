@@ -12,21 +12,22 @@ import {
     SuccessResponse,
     Post, Delete
 } from "tsoa";
-import {MockShopItemRepository} from "../mock/mock.shopItem.repo";
+
 import {APIErrorType} from "@app/shared-models/src/error.type";
 import {type ShopItemCreationRequest,type ShopItemUpdateRequest} from "@app/shared-models/src/api.type";
+import {ShopItemRepository} from "../repositories/shopItem.repository";
 
 
 
 @Route('/api/shop-item')
 export class ShopItemController extends Controller{
-    private shopItemRepository: MockShopItemRepository = MockShopItemRepository.getInstance();
+    private shopItemRepository: ShopItemRepository = ShopItemRepository.getInstance();
 
     @Get('')
     @NoSecurity()
     @SuccessResponse('200', 'OK')
     public async getAllShopItems(){
-        return this.shopItemRepository.getAll();
+        return this.shopItemRepository.findAll();
     }
 
     @Get('{id}')
@@ -39,7 +40,7 @@ export class ShopItemController extends Controller{
         const shopItem = await this.shopItemRepository.findById(id);
         if (!shopItem) {
             throw errShopItemNotFound(404, {
-                code: 'ERR_SHOPITEM_NOT_FOUND'
+                code: 'ERR_SHOP_ITEM_NOT_FOUND'
             });
         }
         return shopItem;
@@ -61,7 +62,7 @@ export class ShopItemController extends Controller{
         const shopItem = await this.shopItemRepository.findById(id);
         if (!shopItem) {
             throw errShopItemNotFound(404, {
-                code: 'ERR_SHOPITEM_NOT_FOUND'
+                code: 'ERR_SHOP_ITEM_NOT_FOUND'
             });
         }
         return this.shopItemRepository.updateOne(id, shopItemData);
@@ -78,7 +79,7 @@ export class ShopItemController extends Controller{
         const existingShopItem = await this.shopItemRepository.findByName(shopItemData.name);
         if (existingShopItem) {
             throw errDuplicateShopItem(409, {
-                code: 'ERR_SHOPITEM_ALREADY_EXISTS'
+                code: 'ERR_SHOP_ITEM_ALREADY_EXISTS'
             });
         }
         return this.shopItemRepository.createOne(shopItemData);
@@ -94,7 +95,7 @@ export class ShopItemController extends Controller{
         const shopItem = await this.shopItemRepository.findById(id);
         if (!shopItem) {
             throw errShopItemNotFound(404, {
-                code: 'ERR_SHOPITEM_NOT_FOUND'
+                code: 'ERR_SHOP_ITEM_NOT_FOUND'
             });
         }
         return this.shopItemRepository.deleteOne(id);

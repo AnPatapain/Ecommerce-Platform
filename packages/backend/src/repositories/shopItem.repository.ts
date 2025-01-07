@@ -1,17 +1,18 @@
 import {PRISMA_CLIENT} from "../../prisma";
 import {ShopItem} from "@app/shared-models/src/shopItem.model";
+import {User} from "@prisma/client"
 import {ShopItemCreationRequest, ShopItemUpdateRequest} from "@app/shared-models/src/api.type";
 
-export class ProductRepository{
-    private static instance: ProductRepository | null = null;
+export class ShopItemRepository{
+    private static instance: ShopItemRepository | null = null;
 
     private constructor() {}
 
-    public static getInstance(): ProductRepository {
-        if (!ProductRepository.instance) {
-            ProductRepository.instance = new ProductRepository();
+    public static getInstance(): ShopItemRepository {
+        if (!ShopItemRepository.instance) {
+            ShopItemRepository.instance = new ShopItemRepository();
         }
-        return ProductRepository.instance;
+        return ShopItemRepository.instance;
     }
 
     public async findAll() : Promise<Array<ShopItem>> {
@@ -23,7 +24,7 @@ export class ProductRepository{
         });
     }
 
-    public async findOneById(id: number): Promise<ShopItem | null> {
+    public async findById(id: number): Promise<ShopItem | null> {
         return await PRISMA_CLIENT.shopItem.findUnique({
             where: {
                 id: id
@@ -35,6 +36,17 @@ export class ProductRepository{
         });
     }
 
+    public async findByName(name: string): Promise<ShopItem | null> {
+        return await PRISMA_CLIENT.shopItem.findUnique({
+            where: {
+                name: name,
+            },
+            include: {
+                orderedShopItems: true,
+                carts: true
+            }
+        });
+    }
     public async createOne(shopItemCreationData: ShopItemCreationRequest){
         return await PRISMA_CLIENT.shopItem.create({
             data:{
@@ -42,52 +54,33 @@ export class ProductRepository{
                 price: shopItemCreationData.price,
                 description: shopItemCreationData.description,
                 image: shopItemCreationData.image,
-                quantity: shopItemCreationData.quantity
+                quantity: shopItemCreationData.quantity,
+                orderedShopItems : undefined,
+                carts: undefined,
             }
         });
     }
 
     public async updateOne(id: number, shopItemUpdateData: ShopItemUpdateRequest){
-        const updateData ={
-            name : shopItemUpdateData.name ? shopItemUpdateData.name : undefined,
-            price : shopItemUpdateData.price ? shopItemUpdateData.price : undefined,
-            description : shopItemUpdateData.description ? shopItemUpdateData.description : undefined,
-            image : shopItemUpdateData.image ? shopItemUpdateData.image : undefined,
-            quantity : shopItemUpdateData.quantity ? shopItemUpdateData.quantity : undefined,
-            carts : undefined,
-            orderedShopItems : undefined
-        };
-        if(shopItemUpdateData.orderedShopItems){
-            updateData.orderedShopItems = {
-                upsert:{
-                    create: {
-                        quantity: shopItemUpdateData.orderedShopItems.quantity,
-                        priceAtPurchase: shopItemUpdateData.orderedShopItems.priceAtPurchase,
-                        shopItemId: shopItemUpdateData.orderedShopItems.shopItemId,
-                        orderId: shopItemUpdateData.orderedShopItems.orderId
-                    },
-                    update: shopItemUpdateData.orderedShopItems
-                }
-            }
-        }
         return await PRISMA_CLIENT.shopItem.update({
             where: {
                 id: id
             },
             data:{
                ...shopItemUpdateData,
-                orderedShopItems: {
-                   upsert:{
-                       create: {
-                            quantity: shopItemUpdateData.orderedShopItems.quantity,
-                            priceAtPurchase: shopItemUpdateData.orderedShopItems.priceAtPurchase,
-                            shopItemId: shopItemUpdateData.orderedShopItems.shopItemId,
-                            orderId: shopItemUpdateData.orderedShopItems.orderId
-                       },
-                       update: shopItemUpdateData.orderedShopItems
-                   }
-                },
+                orderedShopItems: undefined,
+                carts : undefined
             }
+        });
+    }
+
+    public async deleteOne(id: number){
+
+        return await PRISMA_CLIENT.shopItem.delete({
+            where: {
+                id: id
+            },
+
         });
     }
 }

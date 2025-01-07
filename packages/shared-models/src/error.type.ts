@@ -11,8 +11,10 @@ type APIErrorCode =
     | 'ERR_USER_NOT_FOUND'
     | 'ERR_USERNAME_PASSWORD_INVALID'
     | 'ERR_SECURITY_CONTEXT_NOT_SET'
-    | 'ERR_SHOPITEM_NOT_FOUND'
-    | 'ERR_SHOPITEM_ALREADY_EXISTS'
+    | 'ERR_SHOP_ITEM_NOT_FOUND'
+    | 'ERR_SHOP_ITEM_ALREADY_EXISTS'
+    | 'ERR_CART_EMPTY'
+    | 'ERR_CART_NOT_FOUND'
 
 const ERROR_CODE_TO_STRING: Record<APIErrorCode, string> = {
     'ERR_UNKNOWN': 'Unknown error from server',
@@ -27,8 +29,10 @@ const ERROR_CODE_TO_STRING: Record<APIErrorCode, string> = {
     'ERR_USER_NOT_FOUND': 'User were not registered to platform',
     'ERR_USERNAME_PASSWORD_INVALID': 'Username or password is invalid',
     'ERR_SECURITY_CONTEXT_NOT_SET': 'Security context is not set',
-    'ERR_SHOPITEM_NOT_FOUND': 'Shop item not found',
-    'ERR_SHOPITEM_ALREADY_EXISTS': 'Shop item already exists',
+    'ERR_SHOP_ITEM_NOT_FOUND': 'Shop item not found',
+    'ERR_SHOP_ITEM_ALREADY_EXISTS': 'Shop item already exists',
+    'ERR_CART_EMPTY': 'Cart is empty',
+    'ERR_CART_NOT_FOUND': 'Cart not found',
 };
 
 

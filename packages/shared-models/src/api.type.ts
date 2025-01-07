@@ -1,13 +1,22 @@
 import {User} from "./user.model";
 import {ShopItem} from "./shopItem.model";
+import {Cart} from "./cart.model";
 
 ////////////////////
 // API Request type
 export type SignupRequest = Pick<User, 'email' | 'password' | 'name'>;
 export type SigninRequest = Pick<User, 'email' | 'password'>;
 export type ResetPasswordRequest = { newPassword: string };
+
+// shopItem
 export type ShopItemCreationRequest = Omit<ShopItem, 'id' |'carts'|'orderedShopItems' >
 export type ShopItemUpdateRequest = Partial<Omit<ShopItem,|'id'>>
+// cart
+export type CartCreationRequest = Omit<Cart,"id"|"shopItems">
+export type CartUpdateRequest = {
+    shopItemsToAdd: Array<number>,
+    shopItemsToRemove: Array<number>,
+}
 
 ////////////////////
 // API Response type

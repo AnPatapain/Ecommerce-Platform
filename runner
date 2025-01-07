@@ -244,7 +244,7 @@ run_up(){
   export DOCKER_DEV_ENTRY_CMD="pnpm i && pnpm run dev"
   mkdir -p node_modules
   docker compose -f "${DOCKER_COMPOSE_DEV}" up --remove-orphans -d
-  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f app-dev -f postgres-db -f nginx-reverse-proxy-dev # Service name not container name
+  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f shop-monorepo-app-dev -f postgres-db -f shop-monorepo-nginx-dev # Service name not container name
   docker compose -f "${DOCKER_COMPOSE_DEV}" down -t 1
 }
 
