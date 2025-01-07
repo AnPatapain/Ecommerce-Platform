@@ -6,6 +6,7 @@ import {
     MailVerificationResponse,
     SignupRequest, ResetPasswordRequest, APISuccessResponse, SignupSuccessResponse
 } from "@app/shared-models/src/api.type.ts";
+import {CONFIG} from "./frontend-config.ts";
 
 export const apiClient = {
     user: {
@@ -26,6 +27,9 @@ export const apiClient = {
         resetPassword: (resetPasswordToken: string, data: ResetPasswordRequest): Promise<APISuccessResponse> =>
             sendRequest("POST", `api/auth/reset-password`, data, resetPasswordToken),
     },
+    shopItem: {
+        getAll: () => sendRequest('GET', 'api/shop-item'),
+    }
 }
 
 async function sendRequest(
@@ -43,7 +47,7 @@ async function sendRequest(
     if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
         options.body = JSON.stringify(body);
     }
-    const response = await fetch(endpoint, options);
+    const response = await fetch(`${CONFIG.PUBLIC_URL}/${endpoint}`, options);
     if (!response.ok) {
         // Throw an error with the status and status text
         const errorData = await response.json(); // Optionally parse the response body

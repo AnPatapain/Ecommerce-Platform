@@ -1,9 +1,9 @@
 import {Container} from "@mantine/core";
 
-export default function Orders() {
+export default function AdminManageSellers() {
     return (
         <Container size={'xs'}>
-            Orders page
+            Admin can add/edit/delete sellers
         </Container>
     )
 }

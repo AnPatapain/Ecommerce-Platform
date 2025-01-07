@@ -1,8 +1,8 @@
-import {Outlet} from "react-router-dom";
-import VerticalNav from "../../components/VerticalNav.tsx";
 import {Grid} from "@mantine/core";
+import VerticalNav from "../../components/VerticalNav.tsx";
+import {Outlet} from "react-router-dom";
 
-export default function AdminPagesTemplate() {
+export default function SellerPagesTemplate() {
     return (
         <Grid>
             <Grid.Col span={3}>

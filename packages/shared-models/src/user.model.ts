@@ -7,4 +7,4 @@ export interface User {
     verified: boolean;
 }
 
-export type UserRole = 'user' | 'admin';
+export type UserRole = 'user' | 'admin' | 'seller';

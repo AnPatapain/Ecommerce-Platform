@@ -1,5 +1,5 @@
 import '@mantine/core/styles.css'
-import { MantineProvider} from "@mantine/core";
+import {createTheme, MantineProvider} from "@mantine/core";
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import {createBrowserRouter, Outlet, RouterProvider} from "react-router-dom";
@@ -16,12 +16,14 @@ import {ToastContainer} from "react-toastify";
 import VerifyAccountEmailDone from "./pages/auth/VerifyAccountEmailDone.tsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.tsx";
 import ResetPassword from "./pages/auth/ResetPassword.tsx";
-import PrivateRoute from "./pages/PrivateRoute.tsx";
+import SecuredRoute from "./pages/SecuredRoute.tsx";
 import PublicRoute from "./pages/PublicRoute.tsx";
 import OrderProduct from "./pages/user/OrderProduct.tsx";
 import AdminPagesTemplate from "./pages/admin/AdminPagesTemplate.tsx";
-import ShopItems from "./pages/admin/ShopItems.tsx";
-import Orders from "./pages/admin/Oders.tsx";
+import AdminManageShopItems from "./pages/admin/AdminManageShopItems.tsx";
+import AdminManageSellers from "./pages/admin/AdminManageSellers.tsx";
+import SellerPagesTemplate from "./pages/seller/SellerPagesTemplate.tsx";
+import SellerManageOrders from "./pages/seller/SellerManageOrders.tsx";
 
 
 const router = createBrowserRouter([
@@ -34,28 +36,36 @@ const router = createBrowserRouter([
         ),
         errorElement: <ErrorPage/>,
         children: [
+            /////////////////
+            // Public route
             {
-                path: "admin",
-                element: (
-                    <AdminPagesTemplate/>
-                ),
-                children: [
-                    {
-                        path: "",
-                        element: <ShopItems/>
-                    },
-                    {
-                        path: "shop-items",
-                        element: <ShopItems/>
-                    },
-                    {
-                        path: "orders",
-                        element: <Orders/>
-                    }
-                ]
+                path: '/signin',
+                element: <PublicRoute><Signin/></PublicRoute>,
             },
             {
-                path: "",
+                path: '/signup',
+                element: <PublicRoute><Signup/></PublicRoute>
+            },
+            {
+                path: '/send-verify-account-email',
+                element: <PublicRoute><SendVerifyAccountEmail/></PublicRoute>
+            },
+            {
+                path: '/verify-account-email',
+                element: <PublicRoute><VerifyAccountEmailDone/></PublicRoute>
+            },
+            {
+                path: '/forgot-password',
+                element: <PublicRoute><ForgotPassword/></PublicRoute>
+            },
+            {
+                path: '/reset-password',
+                element: <PublicRoute><ResetPassword/></PublicRoute>
+            },
+            /////////////////
+            // User route
+            {
+                path: "/",
                 element: (
                     <UserPagesTemplate />
                 ),
@@ -66,33 +76,53 @@ const router = createBrowserRouter([
                     },
                     {
                         path: "order-product",
-                        element: <PrivateRoute><OrderProduct/></PrivateRoute>
+                        element: <OrderProduct/>
                     }
                 ],
             },
+            /////////////////
+            // Admin route
             {
-                path: 'signin',
-                element: <PublicRoute><Signin/></PublicRoute>,
+                path: "/admin",
+                element: (
+                    <SecuredRoute requiredRoles={['admin']}>
+                        <AdminPagesTemplate/>
+                    </SecuredRoute>
+                ),
+                children: [
+                    {
+                        path: "",
+                        element: <AdminManageShopItems/>
+                    },
+                    {
+                        path: "shop-items",
+                        element: <AdminManageShopItems/>
+                    },
+                    {
+                        path: "sellers",
+                        element: <AdminManageSellers/>
+                    }
+                ]
             },
+            /////////////////
+            // Seller route
             {
-                path: 'signup',
-                element: <PublicRoute><Signup/></PublicRoute>
-            },
-            {
-                path: 'send-verify-account-email',
-                element: <PublicRoute><SendVerifyAccountEmail/></PublicRoute>
-            },
-            {
-                path: 'verify-account-email',
-                element: <PublicRoute><VerifyAccountEmailDone/></PublicRoute>
-            },
-            {
-                path: 'forgot-password',
-                element: <PublicRoute><ForgotPassword/></PublicRoute>
-            },
-            {
-                path: 'reset-password',
-                element: <PublicRoute><ResetPassword/></PublicRoute>
+                path: "/seller",
+                element: (
+                    <SecuredRoute requiredRoles={['seller']}>
+                        <SellerPagesTemplate/>
+                    </SecuredRoute>
+                ),
+                children: [
+                    {
+                        path: "",
+                        element: <SellerManageOrders/>
+                    },
+                    {
+                        path: "orders",
+                        element: <SellerManageOrders/>
+                    },
+                ]
             },
             {
                 path: '/draft',
@@ -108,16 +138,19 @@ const router = createBrowserRouter([
     }
 ]);
 
+const theme = createTheme({
+    colors: {
+        // Define your own color palette
+        primary: ['#000000', '#000000', '#000000', '#000000', '#000000', '#000000', '#000000', '#000000', '#000000', '#000000'],
+        danger: ['#FFE5E5', '#FFC2C2', '#FF9999', '#FF6666', '#FF3333', '#FF0000', '#E60000', '#CC0000', '#B30000', '#990000'],
+    },
+    primaryColor: 'primary',
+});
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
         <MantineProvider
-            theme={{
-                colors: {
-                    // Define your own color palette
-                    primary: ['#000000', '#000000', '#000000', '#000000', '#000000', '#000000', '#000000', '#000000', '#000000', '#000000'],
-                },
-                primaryColor: 'primary',
-            }}
+            theme={ theme }
         >
             <RouterProvider router={router}/>
             <ToastContainer />

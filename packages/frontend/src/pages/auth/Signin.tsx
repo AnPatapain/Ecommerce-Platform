@@ -14,7 +14,7 @@ export default function Signin() {
     const navigate = useNavigate();
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
-    // Get the "from" location or default to "/". It were set in PrivateRoute
+    // Get the "from" location or default to "/". It were set in SecuredRoute
     const location = useLocation(); // Access location state
     const from = location.state?.from?.pathname || "/";
 
@@ -35,13 +35,8 @@ export default function Signin() {
         setError(null);
         try {
             setIsProcessing(true);
-            const user= await signin(values.email, values.password);
+            await signin(values.email, values.password);
             setIsProcessing(false);
-
-            if (user.role === 'admin') {
-                navigate('/admin', {replace: true});
-                return;
-            }
 
             // Redirect to the original page or home page. Replace ensures that signin page is removed from browser history stack
             navigate(from, { replace: true });

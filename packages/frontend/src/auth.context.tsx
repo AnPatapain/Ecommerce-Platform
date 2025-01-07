@@ -7,6 +7,7 @@ import {APISuccessResponse, MailVerificationResponse, SignupSuccessResponse} fro
 const API_KEY_LOCALSTORAGE_KEY = 'x-api-key';
 
 interface AuthContextType {
+    finishLoadingAuthContext: boolean;
     currentUser: User | null;
     token: string | null;
     signup: (email: string, name: string, password: string) => Promise<SignupSuccessResponse>;
@@ -23,16 +24,20 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({children}: { children: any }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem(API_KEY_LOCALSTORAGE_KEY));
+    const [finishLoadingAuthContext, setFinishLoadingAuthContext ] = useState<boolean>(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchCurrentUser = async () => {
             if (token) {
                 try {
+                    setFinishLoadingAuthContext(false);
                     const user = await apiClient.user.getCurrent(token);
                     setCurrentUser(user);
+                    setFinishLoadingAuthContext(true);
                 } catch (error) {
-                    console.error("Invalid token. Redirecting to signin.");
+                    console.error('AuthContext::', error);
+                    setFinishLoadingAuthContext(true);
                     signout();
                 }
             }
@@ -114,6 +119,7 @@ export const AuthProvider = ({children}: { children: any }) => {
 
     return <AuthContext.Provider
         value={{
+            finishLoadingAuthContext: finishLoadingAuthContext,
             currentUser,
             token,
             signup,
