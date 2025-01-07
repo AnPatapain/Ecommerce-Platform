@@ -1,9 +1,9 @@
-import {ShopItem} from "./shopItem.model";
+import {ShopItemOnCart} from "./shopItemOnCart.model";
 
 export type Cart = {
     id: number;
 
     //relationship
-    shopItems : ShopItem[];
+    shopItems : ShopItemOnCart[];
     userId: number;
 }

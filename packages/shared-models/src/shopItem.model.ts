@@ -1,5 +1,5 @@
 import {OrderedShopItem} from "./orderedShopItem.model";
-import {Cart} from "./cart.model";
+import {ShopItemOnCart} from "./shopItemOnCart.model";
 
 
 export type ShopItem = {
@@ -12,5 +12,5 @@ export type ShopItem = {
 
     //relationship
     orderedShopItems : OrderedShopItem[];
-    carts : Cart[];
+    carts : ShopItemOnCart[];
 }
