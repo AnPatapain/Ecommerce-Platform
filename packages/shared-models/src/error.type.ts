@@ -15,6 +15,7 @@ type APIErrorCode =
     | 'ERR_SHOP_ITEM_ALREADY_EXISTS'
     | 'ERR_CART_EMPTY'
     | 'ERR_CART_NOT_FOUND'
+    | 'ERR_CART_ALREADY_EXISTS';
 
 const ERROR_CODE_TO_STRING: Record<APIErrorCode, string> = {
     'ERR_UNKNOWN': 'Unknown error from server',
@@ -33,6 +34,7 @@ const ERROR_CODE_TO_STRING: Record<APIErrorCode, string> = {
     'ERR_SHOP_ITEM_ALREADY_EXISTS': 'Shop item already exists',
     'ERR_CART_EMPTY': 'Cart is empty',
     'ERR_CART_NOT_FOUND': 'Cart not found',
+    'ERR_CART_ALREADY_EXISTS': 'Cart already exists',
 };
 
 

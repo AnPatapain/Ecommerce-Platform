@@ -49,8 +49,15 @@ export class CartController extends Controller{
     @SuccessResponse('201', 'Created')
     public async createCart(
         @Request() req: express.Request,
+        @Res() errCartAlreadyExists: TsoaResponse<404, APIErrorType>
     ) {
         const userId = getCurrentUser(req).id;
+        const oldCart = await this.cartRepository.findByUserId(userId);
+        if (oldCart) {
+            throw errCartAlreadyExists(404, {
+                code: 'ERR_CART_ALREADY_EXISTS'
+            });
+        }
         const cart = await this.cartRepository.createOne({ userId });
         await this.userRepository.updateOne(userId, { cart: cart });
         return cart;
