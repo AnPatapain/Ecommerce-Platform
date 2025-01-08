@@ -40,6 +40,8 @@ export const AuthProvider = ({children}: { children: any }) => {
                     setFinishLoadingAuthContext(true);
                     signout();
                 }
+            } else {
+                setFinishLoadingAuthContext(true);
             }
         }
         fetchCurrentUser();
