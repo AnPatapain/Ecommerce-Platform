@@ -7,6 +7,8 @@ export interface User {
     name: string;
     role: UserRole;
     verified: boolean;
+
+    cart?: Cart;
 }
 
 export type UserRole = 'user' | 'admin';

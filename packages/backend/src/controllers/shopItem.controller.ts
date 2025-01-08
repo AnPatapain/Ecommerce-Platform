@@ -52,7 +52,7 @@ export class ShopItemController extends Controller{
 
 
     @Put('{id}')
-    @Security('token', ['shopItem:update'])
+    @Security('token', ['shopItem.write'])
     @SuccessResponse('200', 'OK')
     public async updateShopItem(
         @Path() id: number,
@@ -70,7 +70,7 @@ export class ShopItemController extends Controller{
 
 
     @Post('')
-    @Security('token', ['shopItem:create'])
+    @Security('token', ['shopItem.write'])
     @SuccessResponse('201', 'Created')
     public async createShopItem(
         @Body() shopItemData: ShopItemCreationRequest,
@@ -86,7 +86,7 @@ export class ShopItemController extends Controller{
     }
 
     @Delete('{id}')
-    @Security('token', ['shopItem:delete'])
+    @Security('token', ['shopItem.write'])
     @SuccessResponse('200', 'OK')
     public async deleteShopItem(
         @Path() id: number,

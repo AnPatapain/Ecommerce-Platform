@@ -79,8 +79,10 @@ export const AuthProvider = ({children}: { children: any }) => {
 
     const verifyAccountEmail = async (verifyToken: string): Promise<void> => {
         try {
+            console.log('Verify account');
             const verifyResponse = await apiClient.auth.verifyAccount(verifyToken);
             const apiAccessToken = verifyResponse.apiAccessToken;
+            console.log('apiAccessToken', apiAccessToken);
             localStorage.setItem(API_KEY_LOCALSTORAGE_KEY, apiAccessToken);
             setToken(apiAccessToken);
 

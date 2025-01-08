@@ -17,11 +17,13 @@ import {RESET_PASSWORD_TEMPLATE, VERIFICATION_EMAIL_TEMPLATE} from "../utils/ema
 import {CONFIG} from "../backend-config";
 import {TokenRepository} from "../repositories/token.repository";
 import {getCurrentUser} from "../security/auth.handler";
+import {CartRepository} from "../repositories/cart.repository";
 
 @Route('/api/auth')
 export class AuthController extends Controller {
     private userRepository: UserRepository = UserRepository.getInstance();
     private tokenRepository: TokenRepository = TokenRepository.getInstance();
+    private cartRepository: CartRepository = CartRepository.getInstance();
 
     @Post('signup')
     @NoSecurity()
@@ -42,6 +44,7 @@ export class AuthController extends Controller {
             password: hashedPassword,
             verified: false,
         });
+
 
         const mailPreviewUrl = await this._sendVerificationEmail(createdUser);
 
@@ -82,7 +85,8 @@ export class AuthController extends Controller {
 
         // Before return API access token, we delete all old tokens (api + verification token) of user
         await this.tokenRepository.deleteMany({userId: user.id});
-
+        const cart = await this.cartRepository.createOne({userId: user.id});
+        await this.userRepository.updateOne(user.id, {cart: cart});
         // Return API access token after user verification
         const apiToken = await generateAndReturnToken({
             userId: user.id,

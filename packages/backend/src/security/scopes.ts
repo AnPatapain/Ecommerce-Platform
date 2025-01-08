@@ -49,6 +49,10 @@ export function getScopesBasedOnUserRoleOrTokenType(userRole: UserRole, token: T
         return USER_SCOPES;
     }
     else if (userRole === 'admin') {
+        if (token.tokenType === 'account_verification') return API_VERIFICATION_SCOPES;
+
+        else if (token.tokenType === 'reset_password') return RESET_PASSWORD_TOKEN;
+
         return ADMIN_SCOPES;
     }
     else {
