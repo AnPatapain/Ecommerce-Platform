@@ -76,6 +76,7 @@ export class AuthController extends Controller {
         @Query() token: string
     ): Promise<APITokenResponse> {
         const user = getCurrentUser(req);
+        console.log('User::', user);
         await this.userRepository.updateOne(user.id, {
             verified: true,
         });

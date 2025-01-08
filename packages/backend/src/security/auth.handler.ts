@@ -32,6 +32,7 @@ export async function expressAuthentication(
         const userScopes = getScopesBasedOnUserRoleOrTokenType(user.role, token);
         for (let requiredScope of scopes as SecurityScope[]) {
             if (!userScopes.has(requiredScope)) {
+                console.log('Blocked here');
                 throw new APIError(403, 'ERR_PERMISSION_DENIED');
             }
         }
