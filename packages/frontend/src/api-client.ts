@@ -47,6 +47,7 @@ async function sendRequest(
     if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
         options.body = JSON.stringify(body);
     }
+    console.log('CONFIG', CONFIG);
     const response = await fetch(`${CONFIG.PUBLIC_URL}/${endpoint}`, options);
     if (!response.ok) {
         // Throw an error with the status and status text
