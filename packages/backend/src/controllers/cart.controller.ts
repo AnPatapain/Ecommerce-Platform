@@ -19,6 +19,7 @@ import { CartRepository } from "../repositories/cart.repository";
 import {ShopItemRepository} from "../repositories/shopItem.repository";
 import {getCurrentUser} from "../security/auth.handler";
 import { UserRepository } from "../repositories/user.repository";
+import {type CartUpdateRequest} from "@app/shared-models/src/api.type";
 
 @Route('/api/cart')
 export class CartController extends Controller{
@@ -70,7 +71,7 @@ export class CartController extends Controller{
     @SuccessResponse('200', 'OK')
     public async updateCart(
         @Path() id: number,
-        @Body() cartData: any,
+        @Body() cartData: CartUpdateRequest,
         @Res() errCartNotFound: TsoaResponse<404, APIErrorType>,
         @Res() errShopItemNotFound: TsoaResponse<404, APIErrorType>
     ) {

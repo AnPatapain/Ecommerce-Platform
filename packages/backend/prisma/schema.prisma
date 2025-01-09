@@ -36,7 +36,6 @@ model User {
 model OrderedShopItem {
   id              Int @id @default(autoincrement())
   priceAtPurchase Int
-  quantity        Int
 
   //relation
   ShopItem   ShopItem @relation(fields: [shopItemId], references: [id])
@@ -46,8 +45,8 @@ model OrderedShopItem {
 }
 
 model Order {
-  id         Int @id @default(autoincrement())
-  totalPrice Int
+  id    Int     @id @default(autoincrement())
+  valid Boolean
 
   //relation
   User   User @relation(fields: [userId], references: [id])

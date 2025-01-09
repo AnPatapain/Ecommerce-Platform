@@ -11,4 +11,4 @@ export interface User {
     cart?: Cart;
 }
 
-export type UserRole = 'user' | 'admin';
+export type UserRole = 'user' | 'admin' | 'seller';

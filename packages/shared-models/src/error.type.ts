@@ -12,10 +12,14 @@ type APIErrorCode =
     | 'ERR_USERNAME_PASSWORD_INVALID'
     | 'ERR_SECURITY_CONTEXT_NOT_SET'
     | 'ERR_SHOP_ITEM_NOT_FOUND'
+    | 'ERR_SHOP_ITEM_INVALID_STOCK'
     | 'ERR_SHOP_ITEM_ALREADY_EXISTS'
     | 'ERR_CART_EMPTY'
     | 'ERR_CART_NOT_FOUND'
-    | 'ERR_CART_ALREADY_EXISTS';
+    | 'ERR_CART_ALREADY_EXISTS'
+    | 'ERR_ORDER_NOT_FOUND'
+    | 'ERR_ORDERED_SHOP_ITEM_ALREADY_EXISTS'
+    | 'ERR_ORDERED_SHOP_ITEM_NOT_FOUND'
 
 const ERROR_CODE_TO_STRING: Record<APIErrorCode, string> = {
     'ERR_UNKNOWN': 'Unknown error from server',
@@ -31,10 +35,14 @@ const ERROR_CODE_TO_STRING: Record<APIErrorCode, string> = {
     'ERR_USERNAME_PASSWORD_INVALID': 'Username or password is invalid',
     'ERR_SECURITY_CONTEXT_NOT_SET': 'Security context is not set',
     'ERR_SHOP_ITEM_NOT_FOUND': 'Shop item not found',
+    'ERR_SHOP_ITEM_INVALID_STOCK': 'Shop item stock is invalid',
     'ERR_SHOP_ITEM_ALREADY_EXISTS': 'Shop item already exists',
     'ERR_CART_EMPTY': 'Cart is empty',
     'ERR_CART_NOT_FOUND': 'Cart not found',
     'ERR_CART_ALREADY_EXISTS': 'Cart already exists',
+    'ERR_ORDER_NOT_FOUND': 'Order not found',
+    'ERR_ORDERED_SHOP_ITEM_ALREADY_EXISTS': 'Ordered shop item already exists',
+    'ERR_ORDERED_SHOP_ITEM_NOT_FOUND': 'Ordered shop item not found',
 };
 
 

@@ -3,7 +3,8 @@ import {OrderedShopItem} from "./orderedShopItem.model";
 
 export type Order = {
     id: number;
-    totalPrice: number;
+    valid : boolean;
     //relationship;
     orderedShopItems: OrderedShopItem[];
+    userId: number;
 }
