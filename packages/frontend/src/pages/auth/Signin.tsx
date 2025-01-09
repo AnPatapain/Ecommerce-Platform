@@ -43,6 +43,13 @@ export default function Signin() {
         } catch (err: any) {
             setIsProcessing(false);
             if (err instanceof APIError) {
+                if (err.code === 'ERR_SELLER_NEED_TO_RESET_PASSWORD') {
+                    toast.warn('Seller need to reset password on the first signin', {
+                        theme: 'dark'
+                    });
+                    navigate('/forgot-password');
+                    return;
+                }
                 if (err.code === 'ERR_USER_NOT_VERIFIED') {
                     toast.warn('Your email is not verified', {
                         theme: 'dark'

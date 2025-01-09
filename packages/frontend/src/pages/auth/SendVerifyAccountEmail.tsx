@@ -40,7 +40,7 @@ export default function SendVerifyAccountEmail() {
             });
         } catch (err: any) {
             setIsProcessing(false);
-            if(err instanceof APIError && err.code === 'ERR_USER_NOT_FOUND') {
+            if(err instanceof APIError && (err.code === 'ERR_USER_NOT_FOUND' || err.code === 'ERR_USER_ALREADY_VERIFIED')) {
                 setVerificationNoti({
                     message: `Please verify your email ${values.email} at your mailbox`,
                     mailBox: ''

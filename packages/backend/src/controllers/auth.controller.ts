@@ -55,12 +55,18 @@ export class AuthController extends Controller {
     @NoSecurity()
     public async sendVerifyAccountEmail(
         @Query() email: string,
-        @Res() errUserNotFound: TsoaResponse<404, APIErrorType>
+        @Res() errUserNotFound: TsoaResponse<404, APIErrorType>,
+        @Res() errUserAlreadyVerified: TsoaResponse<400, APIErrorType>
     ): Promise<MailVerificationResponse> {
         const user = await this.userRepository.findByEmail(email);
         if (!user) {
             throw errUserNotFound(404, {
                 code: 'ERR_USER_NOT_FOUND'
+            });
+        }
+        if (user.verified) {
+            throw errUserAlreadyVerified(400, {
+                code: 'ERR_USER_ALREADY_VERIFIED'
             });
         }
         const mailPreviewUrl = await this._sendVerificationEmail(user);
@@ -76,7 +82,7 @@ export class AuthController extends Controller {
         @Query() token: string
     ): Promise<APITokenResponse> {
         const user = getCurrentUser(req);
-        console.log('User::', user);
+
         await this.userRepository.updateOne(user.id, {
             verified: true,
         });
@@ -108,7 +114,13 @@ export class AuthController extends Controller {
                 code: 'ERR_USERNAME_PASSWORD_INVALID'
             });
         }
+
         if (!user.verified) {
+            if (user.role === 'seller') {
+                throw errUserNotVerified(401, {
+                    code: 'ERR_SELLER_NEED_TO_RESET_PASSWORD'
+                });
+            }
             throw errUserNotVerified(401, {
                 code: 'ERR_USER_NOT_VERIFIED'
             });
@@ -150,6 +162,12 @@ export class AuthController extends Controller {
         const currentUser = getCurrentUser(req);
         const newHashedPassword = generatePasswordHashed(requestBody.newPassword);
         await this.userRepository.updateOne(currentUser.id, {password: newHashedPassword});
+
+        if (currentUser.role === 'seller') {
+            await this.userRepository.updateOne(currentUser.id, {
+                verified: true,
+            })
+        }
         return {
             success: true
         };

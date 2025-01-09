@@ -10,8 +10,8 @@
     "dev:backend": "pnpm --filter backend run dev",
     "dev": "concurrently --kill-others \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
     "-------- Build scripts --------": "",
-    "build:frontend": "pnpm install && pnpm --filter frontend run build",
-    "build": "pnpm install && pnpm run build:frontend",
+    "build": "pnpm install && pnpm --filter frontend run build",
+    "build:staging": "pnpm install && pnpm --filter frontend run build:staging",
     "preview": "vite preview",
     "-------- Prod scripts --------": "",
     "prod": "pnpm --filter backend run prod"

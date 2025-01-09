@@ -8,6 +8,7 @@ export type SigninRequest = Pick<User, 'email' | 'password'>;
 export type ResetPasswordRequest = { newPassword: string };
 export type ShopItemCreationRequest = Omit<ShopItem, 'id' |'carts'|'orderedShopItems' >
 export type ShopItemUpdateRequest = Partial<Omit<ShopItem,|'id'>>
+export type SellerCreationRequest = Omit<User, 'id' | 'role' | 'verified'>;
 
 ////////////////////
 // API Response type
@@ -24,4 +25,8 @@ export type SignupSuccessResponse = {
 }
 export type MailVerificationResponse = {
     mailPreviewUrl: string;
+}
+export type SellerCreationResponse = {
+    createdSeller: User,
+    mailPreviewUrl: string,
 }

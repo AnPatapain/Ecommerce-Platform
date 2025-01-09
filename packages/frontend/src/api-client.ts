@@ -4,7 +4,11 @@ import {
     APITokenResponse,
     SigninRequest,
     MailVerificationResponse,
-    SignupRequest, ResetPasswordRequest, APISuccessResponse, SignupSuccessResponse
+    SignupRequest,
+    ResetPasswordRequest,
+    APISuccessResponse,
+    SignupSuccessResponse,
+    SellerCreationRequest, SellerCreationResponse
 } from "@app/shared-models/src/api.type.ts";
 import {CONFIG} from "./frontend-config.ts";
 
@@ -29,6 +33,14 @@ export const apiClient = {
     },
     shopItem: {
         getAll: () => sendRequest('GET', 'api/shop-item'),
+    },
+    admin: {
+        getAllSellers: (token: string): Promise<User[]> =>
+            sendRequest('GET', 'api/users?role=seller', undefined, token),
+        addSeller: (data: SellerCreationRequest, token: string): Promise<SellerCreationResponse> =>
+            sendRequest('POST', 'api/users', data, token),
+        deleteSeller: (sellerId: number, token: string): Promise<APISuccessResponse> =>
+            sendRequest('DELETE', `api/users/${sellerId}`, undefined, token),
     }
 }
 
@@ -47,7 +59,6 @@ async function sendRequest(
     if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
         options.body = JSON.stringify(body);
     }
-    console.log('CONFIG', CONFIG);
     const response = await fetch(`${CONFIG.PUBLIC_URL}/${endpoint}`, options);
     if (!response.ok) {
         // Throw an error with the status and status text

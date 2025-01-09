@@ -53,7 +53,7 @@ export default function ForgotPassword() {
 
     return (
         <Container size="xs">
-            <h1>Forgot your password?</h1>
+            <h1>Want to reset your password?</h1>
             <form onSubmit={form.onSubmit(handleSubmit)}>
                 <TextInput
                     label="Please type your email to get reset password link"

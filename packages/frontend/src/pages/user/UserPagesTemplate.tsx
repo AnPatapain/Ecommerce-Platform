@@ -11,9 +11,9 @@ export default function UserPagesTemplate() {
     }
 
     if (currentUser?.role === 'admin') {
-        return <Navigate to={'/admin'} />;
+        return <Navigate to={'/admin/sellers'} />;
     } else if (currentUser?.role === 'seller') {
-        return <Navigate to={'/seller'} />;
+        return <Navigate to={'/seller/orders'} />;
     }
 
     return (

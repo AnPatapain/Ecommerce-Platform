@@ -6,27 +6,21 @@ import { LuShoppingBag } from "react-icons/lu";
 import { FiUsers } from "react-icons/fi";
 import { Group } from '@mantine/core';
 import classes from './VerticalNav.module.css';
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {useAuth} from "../auth.context.tsx";
 import {toast} from "react-toastify";
 import {User, UserRole} from "@app/shared-models/src/user.model.ts";
 
-const getDefaultActiveElement = (role: UserRole): string => {
-    if (role === 'admin') {
-        return 'Manage shop items';
-    }
-    else if (role === 'seller') {
-        return 'Manage orders';
-    } else {
-        return 'Con cac'; // Should never happen on prod.
-    }
+const getActiveNavElement = (pathname: string, navElements: { link: string; label: string }[]): string => {
+    const activeElement = navElements.find((item) => pathname.startsWith(item.link));
+    return activeElement ? activeElement.label : '';
 }
 
 const getNavElementsBasedOnRole = (role: UserRole)=> {
     if (role === 'admin') {
         return [
-            { link: '/admin/shop-items', label: 'Manage shop items', icon: AiOutlineProduct },
             { link: '/admin/sellers', label: 'Manage sellers', icon: FiUsers },
+            { link: '/admin/shop-items', label: 'Manage shop items', icon: AiOutlineProduct },
         ];
     }
     else if (role === 'seller') {
@@ -39,13 +33,15 @@ const getNavElementsBasedOnRole = (role: UserRole)=> {
 }
 
 export default function VerticalNav() {
-    const [active, setActive] = useState('Manage shop items');
+    const [active, setActive] = useState('Manage sellers');
     const navigate = useNavigate();
     const {signout} = useAuth();
     const {currentUser} = useAuth();
+    const location = useLocation();
 
     useEffect(() => {
-        setActive(getDefaultActiveElement((currentUser as User).role));
+        const navElements = getNavElementsBasedOnRole((currentUser as User).role);
+        setActive(getActiveNavElement(location.pathname, navElements));
     }, [currentUser]);
 
     const links = getNavElementsBasedOnRole((currentUser as User).role).map((item) => (

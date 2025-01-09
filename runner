@@ -198,9 +198,14 @@ sync_env_files() {
   ln -sf "${ROOT_PROJECT}"/.env "${ROOT_PROJECT}"/packages/frontend/.env
 }
 
-# Function to build frontend static files
-run_build_fe() {
+# Function to build frontend static files on production
+run_build_fe_prod() {
   pnpm install && pnpm run build
+}
+
+# Function to build frontend static files on staging
+run_build_fe_staging() {
+  pnpm install && pnpm run build:staging
 }
 
 # Function to run the application in production mode
@@ -295,7 +300,7 @@ elif [[ "$1" = "up" ]]; then
 
 elif [[ "$1" = "build-fe" ]]; then
   clean_app --force-proceed
-  run_build_fe
+  run_build_fe_prod
   exit 0
 
 elif [[ "$1" = "prod" ]]; then
@@ -306,7 +311,7 @@ elif [[ "$1" = "prod" ]]; then
 elif [[ "$1" = "staging" ]]; then
   check_prerequisite
   if [[ $? -eq 0 ]]; then
-    run_build_fe
+    run_build_fe_staging
     run_staging
   else
     echo "Prerequisites not met. Exiting."

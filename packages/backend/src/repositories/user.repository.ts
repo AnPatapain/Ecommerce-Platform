@@ -49,6 +49,14 @@ export class UserRepository {
         } : null;
     }
 
+    public async deleteOneById(id: number) {
+        return PRISMA_CLIENT.user.delete({
+            where: {
+                id: id
+            }
+        });
+    }
+
     public async deleteMany() {
         return PRISMA_CLIENT.user.deleteMany({});
     }

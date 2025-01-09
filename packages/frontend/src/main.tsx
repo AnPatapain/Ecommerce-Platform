@@ -92,7 +92,7 @@ const router = createBrowserRouter([
                 children: [
                     {
                         path: "",
-                        element: <AdminManageShopItems/>
+                        element: <AdminManageSellers/>
                     },
                     {
                         path: "shop-items",

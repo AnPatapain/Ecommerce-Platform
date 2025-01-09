@@ -8,7 +8,8 @@
     "-------- Dev scripts --------": "",
     "dev": "vite",
     "-------- Build scripts --------": "",
-    "build": "vite build"
+    "build": "vite build",
+    "build:staging": "vite build --mode staging"
   },
   "dependencies": {
     "@app/shared-models": "workspace:*",

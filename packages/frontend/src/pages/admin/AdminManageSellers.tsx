@@ -1,35 +1,80 @@
-import {Alert, Button, Flex, Group, Modal, Table, TextInput} from "@mantine/core";
+import {Alert, Button, Flex, Group, Modal, Table, Text, TextInput} from "@mantine/core";
 import {User} from "@app/shared-models/src/user.model.ts";
-import {useState} from "react";
-import AppLink from "../../components/AppLink.tsx";
+import {useEffect, useState} from "react";
+import {apiClient} from "../../api-client.ts";
+import {useAuth} from "../../auth.context.tsx";
+import {useForm} from "@mantine/form";
+import {getEmailValidator} from "@app/shared-utils/src/email-validator.ts";
+import {toast} from "react-toastify";
 
-const users: User[] = [
-    {
-        id: 1,
-        email: 'seller1@ecm.fr',
-        password: 'password1',
-        name: 'seller 1',
-        role: 'seller',
-        verified: true,
-    },
-    {
-        id: 2,
-        email: 'seller2@ecm.fr',
-        password: 'password1',
-        name: 'seller 2',
-        role: 'seller',
-        verified: true,
-    },
-]
+/**
+ * Admin create seller with default password. But this is not security risk because
+ * seller need to reset password using the link sent to their mail on the first sign-in
+ */
+const DEFAULT_SELLER_PASSWORD = 'azerty'
 
 export default function AdminManageSellers() {
-    const [editSeller, setEditSeller] = useState<User | null>(null);
+    const [sellers, setSellers] = useState<User[]>([]);
+    const [isAdd, setIsAdd] = useState<boolean>(false);
+    const {token} = useAuth();
+    const [error, setError] = useState<string | null>(null);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
+    const [addDone, setAddDone] = useState<boolean>(false);
+
+    const form = useForm({
+        initialValues: {
+            email: "",
+            name: "",
+        },
+        validate: {
+            email: (value) => (getEmailValidator().test(value) ? null : "Invalid email"),
+        },
+    });
+
+    useEffect(() => {
+        async function fetchSellers() {
+            const sellers_ = await apiClient.admin.getAllSellers(token as string);
+            setSellers(sellers_);
+        }
+
+        fetchSellers();
+    }, []);
+
+    const addSeller = async (values: {email: string, name: string}) => {
+        try {
+            setIsProcessing(true);
+            await apiClient.admin.addSeller({
+                email: values.email,
+                name: values.name,
+                password: DEFAULT_SELLER_PASSWORD
+            }, token as string);
+            setIsProcessing(false);
+            setAddDone(true);
+            const updatedSellers = await apiClient.admin.getAllSellers(token as string);
+            setSellers(updatedSellers);
+            toast.success('Seller is added successfully!');
+        } catch (error: any) {
+            setIsProcessing(false);
+            setError(error.toString());
+        }
+    }
+
+    const deleteSeller= async (id: number) => {
+        try {
+            await apiClient.admin.deleteSeller(id, token as string);
+            const updatedSellers = await apiClient.admin.getAllSellers(token as string);
+            setSellers(updatedSellers);
+            toast.success('Seller is deleted successfully!');
+        } catch (error: any) {
+            setError(error.toString());
+        }
+    }
 
     return (
         <Flex direction={'column'} pt={'md'}>
             <Flex direction={'column'} justify="space-between" align="flex-start" mb={'xs'}>
                 <h1>Manage seller for your shop</h1>
-                <Button>Add</Button>
+                <Button onClick={() => {setIsAdd(true)}}>Add</Button>
             </Flex>
             <Table highlightOnHover withTableBorder withColumnBorders>
                 <Table.Thead>
@@ -43,17 +88,24 @@ export default function AdminManageSellers() {
                     </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>{
-                    users.map((user) => (
-                        <Table.Tr key={user.email}>
-                            <Table.Td>{user.id}</Table.Td>
-                            <Table.Td>{user.email}</Table.Td>
-                            <Table.Td>{user.name}</Table.Td>
-                            <Table.Td>{user.role}</Table.Td>
-                            <Table.Td>{user.verified.toString()}</Table.Td>
+                    sellers.map((seller) => (
+                        <Table.Tr key={seller.email}>
+                            <Table.Td>{seller.id}</Table.Td>
+                            <Table.Td>{seller.email}</Table.Td>
+                            <Table.Td>{seller.name}</Table.Td>
+                            <Table.Td>{seller.role}</Table.Td>
+                            <Table.Td>{seller.verified.toString()}</Table.Td>
                             <Table.Td>
                                 <Group>
-                                    <Button onClick={() => {setEditSeller(user)}}>Edit</Button>
-                                    <Button color={'red'} variant={'outline'}>Delete</Button>
+                                    <Button
+                                        color={'red'}
+                                        variant={'outline'}
+                                        onClick={() => {
+                                            deleteSeller(seller.id);
+                                        }}
+                                    >
+                                        Delete
+                                    </Button>
                                 </Group>
                             </Table.Td>
                         </Table.Tr>
@@ -61,20 +113,43 @@ export default function AdminManageSellers() {
                 }</Table.Tbody>
             </Table>
             {
-                editSeller && <Modal size={'md'} opened={!!editSeller} onClose={() => {setEditSeller(null)}} title="Add seller">
-                    <TextInput
-                        label="Email"
-                        placeholder="seller-1@ecm.fr"
-                    />
-                    <TextInput
-                        label="Name"
-                        placeholder="Seller 1"
-                    />
-                    <Button mt={'xs'}>Add</Button>
+                isAdd &&
+                <Modal
+                    size={'md'}
+                    opened={isAdd}
+                    onClose={() => {setIsAdd(false)}}
+                    title= {<h2>Add seller</h2>}
+                >
+                    <form onSubmit={form.onSubmit(addSeller)}>
+                        <TextInput
+                            label="Email"
+                            placeholder="seller-1@ecm.fr"
+                            {...form.getInputProps("email")}
+                        />
+                        <TextInput
+                            label="Name"
+                            placeholder="Seller 1"
+                            {...form.getInputProps("name")}
+                        />
+                        <Button mt={'xs'} loading={isProcessing} loaderProps={{type: 'dots'}} type='submit' disabled={addDone}>Add</Button>
+                    </form>
+
+                    {error && (
+                        <Alert color="red" mt="md">
+                            {error}
+                        </Alert>
+                    )}
 
                     <Alert variant="light" color="blue" mt={'xl'} title="Notice">
-                        After adding a seller, if the seller email is correct, a reset password link
-                        will be sent to their mailbox so that they can set the password
+                        If there is no existing seller with such email, a new seller account will be created.
+                        <br/><br/>
+                        <></>
+                        <Group gap={'xs'}>
+                            Password <Text fw={700}>{DEFAULT_SELLER_PASSWORD}</Text>
+                        </Group>
+                        <br/>
+                        Don't worry about hard code password, because seller need to reset password using
+                        the link sent to their mail on the first sign-in
                     </Alert>
                 </Modal>
             }

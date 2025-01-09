@@ -7,12 +7,14 @@ type APIErrorCode =
     | 'ERR_PERMISSION_DENIED'
     | 'ERR_VALIDATION'
     | 'ERR_USER_ALREADY_EXISTS'
+    | 'ERR_USER_ALREADY_VERIFIED'
     | 'ERR_USER_NOT_VERIFIED'
     | 'ERR_USER_NOT_FOUND'
     | 'ERR_USERNAME_PASSWORD_INVALID'
     | 'ERR_SECURITY_CONTEXT_NOT_SET'
     | 'ERR_SHOPITEM_NOT_FOUND'
     | 'ERR_SHOPITEM_ALREADY_EXISTS'
+    | 'ERR_SELLER_NEED_TO_RESET_PASSWORD'
 
 const ERROR_CODE_TO_STRING: Record<APIErrorCode, string> = {
     'ERR_UNKNOWN': 'Unknown error from server',
@@ -24,11 +26,13 @@ const ERROR_CODE_TO_STRING: Record<APIErrorCode, string> = {
     'ERR_VALIDATION': 'Validation failed',
     'ERR_USER_ALREADY_EXISTS': 'User already exists',
     'ERR_USER_NOT_VERIFIED': 'User is not verified',
+    'ERR_USER_ALREADY_VERIFIED': 'User is already verified',
     'ERR_USER_NOT_FOUND': 'User were not registered to platform',
     'ERR_USERNAME_PASSWORD_INVALID': 'Username or password is invalid',
     'ERR_SECURITY_CONTEXT_NOT_SET': 'Security context is not set',
     'ERR_SHOPITEM_NOT_FOUND': 'Shop item not found',
     'ERR_SHOPITEM_ALREADY_EXISTS': 'Shop item already exists',
+    'ERR_SELLER_NEED_TO_RESET_PASSWORD': 'Seller need to reset password on the first sign-in'
 };
 
 
