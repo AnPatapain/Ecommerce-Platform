@@ -47,7 +47,10 @@ export class UserController extends Controller {
         const mailPreviewUrl = await this._sendSellerResetPasswordEmail(user);
 
         return {
-            createdSeller: updatedUser,
+            createdSeller: {
+                ...updatedUser,
+                cart: updatedUser.cart? {...updatedUser.cart} : undefined,
+            },
             mailPreviewUrl: mailPreviewUrl,
         };
     }
