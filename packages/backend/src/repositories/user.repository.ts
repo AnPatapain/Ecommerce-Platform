@@ -79,11 +79,15 @@ export class UserRepository {
             where: { id },
             data: {
                 ...userEditData,
-                cart: userEditData.cart
-                    ? { connect: { id: userEditData.cart.id } }
-                    : undefined
+                cart: undefined
             },
-            include: { cart: true }
+            include: {
+                cart: {
+                    include: {
+                        shopItems: true
+                    }
+                }
+            }
         });
         return {
             ...updatedUser,

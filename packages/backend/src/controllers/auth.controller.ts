@@ -84,9 +84,8 @@ export class AuthController extends Controller {
         });
 
         // Before return API access token, we delete all old tokens (api + verification token) of user
+        await this.cartRepository.createOne({userId: user.id});
         await this.tokenRepository.deleteMany({userId: user.id});
-        const cart = await this.cartRepository.createOne({userId: user.id});
-        await this.userRepository.updateOne(user.id, {cart: cart});
         // Return API access token after user verification
         const apiToken = await generateAndReturnToken({
             userId: user.id,
