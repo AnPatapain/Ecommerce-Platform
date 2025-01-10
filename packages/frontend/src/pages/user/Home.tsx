@@ -8,7 +8,10 @@ import {toast} from "react-toastify";
 export const Home = () => {
     const [shopItems, setShopItems] = useState<ShopItem[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const {token} = useAuth();
+    const {token, currentUser} = useAuth();
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    console.log('currentUser::', currentUser);
 
     useEffect(() => {
         async function fetchShopItems() {
@@ -27,7 +30,18 @@ export const Home = () => {
             toast.info(`Please signin to add ${shopItem.name} to cart`);
             return;
         }
-        toast.success('Your token ' + token);
+        try {
+            setIsProcessing(true);
+            await apiClient.cart.addShopItemToCart({
+                shopItemsToAdd: [shopItem.id],
+                shopItemsToRemove: [],
+            }, token);
+            setIsProcessing(false);
+            toast.success('Product is added to cart successfully.');
+        } catch (error: any) {
+            setIsProcessing(false)
+            setError(error.toString());
+        }
     }
 
     return (
@@ -35,7 +49,7 @@ export const Home = () => {
             <Grid>
                 {
                     shopItems.map((shopItem: ShopItem) => (
-                        <Grid.Col span={3}>
+                        <Grid.Col span={3} key={shopItem.id}>
                             <Card shadow="sm"
                                   padding="lg"
                                   radius="md" withBorder
@@ -58,7 +72,10 @@ export const Home = () => {
                                     {shopItem.description}
                                 </Text>
 
-                                <Button fullWidth
+                                <Button disabled={isProcessing}
+                                        loading={isProcessing}
+                                        loaderProps={{type: 'dots'}}
+                                        fullWidth
                                         radius="md"
                                         style={{ marginTop: 'auto' }}
                                         onClick={() => {
@@ -72,6 +89,7 @@ export const Home = () => {
                     ))
                 }
             </Grid>
+            {error && toast.error(error)}
         </Container>
     );
 };

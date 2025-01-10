@@ -8,7 +8,7 @@ import {
     ResetPasswordRequest,
     APISuccessResponse,
     SignupSuccessResponse,
-    SellerCreationRequest, SellerCreationResponse
+    SellerCreationRequest, SellerCreationResponse, CartUpdateRequest
 } from "@app/shared-models/src/api.type.ts";
 import {CONFIG} from "./frontend-config.ts";
 
@@ -33,6 +33,11 @@ export const apiClient = {
     },
     shopItem: {
         getAll: () => sendRequest('GET', 'api/shop-item'),
+        addShopItemToCart: () => sendRequest('PUT', 'api/cart')
+    },
+    cart: {
+        addShopItemToCart: (data: CartUpdateRequest, token: string) =>
+            sendRequest('PUT', 'api/cart', data, token)
     },
     admin: {
         getAllSellers: (token: string): Promise<User[]> =>
