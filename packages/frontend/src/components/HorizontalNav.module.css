@@ -13,7 +13,8 @@
 }
 
 .link {
-    display: block;
+    display: flex;
+    align-items: center;
     line-height: 1;
     padding: 8px 12px;
     border-radius: var(--mantine-radius-sm);
@@ -29,4 +30,10 @@
 
 .linkLabel {
     margin-right: 5px;
+}
+
+.linkIcon {
+    margin-right: var(--mantine-spacing-sm);
+    width: 25px;
+    height: 25px;
 }

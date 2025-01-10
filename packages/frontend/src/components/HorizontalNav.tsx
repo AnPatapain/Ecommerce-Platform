@@ -7,11 +7,22 @@ import AppLink from "./AppLink.tsx";
 import {useNavigate} from "react-router-dom";
 import {toast} from "react-toastify";
 
-function getLinksForNavBar(user: User | null) {
+import { CiShoppingCart } from "react-icons/ci";
+import { AiOutlineProduct } from "react-icons/ai";
+
+type NavLink = {
+    link: string;
+    label: string;
+    icon?: React.ElementType; // Optional, since not all links have icons
+    links?: { link: string; label: string }[]; // Nested links (optional)
+};
+
+
+function getLinksForNavBar(user: User | null): NavLink[] {
     if(user) {
         return [
-            { link: '/my-orders', label: 'My Orders' },
-            { link: '/my-carts', label: 'My Carts' },
+            { link: '/my-orders', label: 'My Orders', icon: AiOutlineProduct },
+            { link: '/my-carts', label: 'My Carts', icon: CiShoppingCart },
             {
                 link: '#2',
                 label: user.name,
@@ -19,22 +30,26 @@ function getLinksForNavBar(user: User | null) {
                     { link: '/my-profile', label: 'My Profile' },
                     { link: '/signout', label: 'Sign out' },
                 ],
+                icon: undefined
             },
         ];
     } else {
         return [
-            { link: '/signin', label: 'Sign in' },
-            { link: '/signup', label: 'Sign up' },
+            { link: '/signin', label: 'Sign in', icon: undefined },
+            { link: '/signup', label: 'Sign up', icon: undefined },
         ];
     }
 }
+
 
 export default function HorizontalNav() {
     const [opened, { toggle }] = useDisclosure(false);
     const {currentUser, signout} = useAuth();
 
-    const links = getLinksForNavBar(currentUser);
+    const links: NavLink[] = getLinksForNavBar(currentUser);
     const navigate = useNavigate();
+
+    console.log(links);
 
     const items = links.map((link) => {
         const menuItems = link.links?.map((item) => (
@@ -81,6 +96,7 @@ export default function HorizontalNav() {
                     navigate(link.link);
                 }}
             >
+                {link.icon && <link.icon className={classes.linkIcon} />}
                 {link.label}
             </a>
         );

@@ -1,35 +1,77 @@
-import {Badge, Button, Card, Container, Group, Image, Text} from "@mantine/core";
-import {useNavigate} from "react-router-dom";
+import {Badge, Button, Card, Container, Grid, Group, Image, Text} from "@mantine/core";
+import {useEffect, useState} from "react";
+import {apiClient} from "../../api-client.ts";
+import {ShopItem} from "@app/shared-models/src/shopItem.model.ts";
+import {useAuth} from "../../auth.context.tsx";
+import {toast} from "react-toastify";
 
 export const Home = () => {
-    const navigate = useNavigate();
+    const [shopItems, setShopItems] = useState<ShopItem[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const {token} = useAuth();
+
+    useEffect(() => {
+        async function fetchShopItems() {
+            try {
+                const shopItems_ = await apiClient.shopItem.getAll();
+                setShopItems(shopItems_);
+            } catch(error: any) {
+                setError(error.toString());
+            }
+        }
+        fetchShopItems();
+    }, []);
+
+    const handleAddToCart = async (shopItem: ShopItem) => {
+        if(!token) {
+            toast.info(`Please signin to add ${shopItem.name} to cart`);
+            return;
+        }
+        toast.success('Your token ' + token);
+    }
 
     return (
-        <Container size={'xs'}>
-            <h3>Fullstack MERN Boilerplate powered by: TypeScript, Node, React, Docker, Nginx, BashScript.</h3>
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-                <Card.Section>
-                    <Image
-                        src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-8.png"
-                        height={160}
-                        alt="Norway"
-                    />
-                </Card.Section>
+        <Container size={'xl'}>
+            <Grid>
+                {
+                    shopItems.map((shopItem: ShopItem) => (
+                        <Grid.Col span={3}>
+                            <Card shadow="sm"
+                                  padding="lg"
+                                  radius="md" withBorder
+                                  style={{ height: '100%'}}
+                            >
+                                <Card.Section>
+                                    <Image
+                                        src={shopItem.image}
+                                        height={160}
+                                        alt="Norway"
+                                    />
+                                </Card.Section>
 
-                <Group justify="space-between" mt="md" mb="xs">
-                    <Text fw={500}>Product</Text>
-                    <Badge color="pink">On Sale</Badge>
-                </Group>
+                                <Group justify="space-between" mt="md" mb="xs">
+                                    <Text fw={500}>{shopItem.name}</Text>
+                                    <Badge color="green">Available</Badge>
+                                </Group>
 
-                <Text size="sm" c="dimmed">
-                    With Fjord Tours you can explore more of the magical fjord landscapes with tours and
-                    activities on and around the fjords of Norway
-                </Text>
+                                <Text size="sm" c="dimmed">
+                                    {shopItem.description}
+                                </Text>
 
-                <Button mt="md" radius="md" onClick={() => {navigate('/order-product')}}>
-                    Order now
-                </Button>
-            </Card>
+                                <Button fullWidth
+                                        radius="md"
+                                        style={{ marginTop: 'auto' }}
+                                        onClick={() => {
+                                            handleAddToCart(shopItem)
+                                        }}
+                                >
+                                    Add to card
+                                </Button>
+                            </Card>
+                        </Grid.Col>
+                    ))
+                }
+            </Grid>
         </Container>
     );
 };
