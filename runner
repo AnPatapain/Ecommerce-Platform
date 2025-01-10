@@ -187,7 +187,7 @@ clean_app() {
     sudo rm -rf packages/backend/tsoa
     sudo rm pnpm-lock.yaml
     sudo rm -rf .pnpm-store
-    sudo docker volume remove postgres_data_dev
+#    sudo docker volume remove postgres_data_dev
     echo "node_modules, dist, nginx config files, postgres_data_dev volume removed successfully !"
   fi
 }
@@ -249,7 +249,7 @@ run_up(){
   export DOCKER_DEV_ENTRY_CMD="pnpm i && pnpm run dev"
   mkdir -p node_modules
   docker compose -f "${DOCKER_COMPOSE_DEV}" up --remove-orphans -d
-  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f app-dev -f postgres-db -f nginx-reverse-proxy-dev # Service name not container name
+  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f shop-monorepo-app-dev -f postgres-db -f shop-monorepo-nginx-dev # Service name not container name
   docker compose -f "${DOCKER_COMPOSE_DEV}" down -t 1
 }
 

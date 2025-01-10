@@ -17,12 +17,12 @@ export class UserRepository {
         const user = await PRISMA_CLIENT.user.findUnique({
             where: {
                 email: email,
-            }
+            },
         });
 
         return user ? {
             ...user,
-            role: user.role as UserRole
+            role: user.role as UserRole,
         } : null;
     }
 
@@ -73,6 +73,7 @@ export class UserRepository {
                 password: userCreationData.password,
                 role: 'user' as UserRole,
                 verified: userCreationData.verified,
+                cart: undefined,
             },
         });
         return {
@@ -83,12 +84,14 @@ export class UserRepository {
 
     public async updateOne(id: number, userEditData: Partial<Omit<User, "id">>) {
         const updatedUser = await PRISMA_CLIENT.user.update({
-            where: {
-                id: id,
-            },
+            where: { id },
             data: {
-                ...userEditData
-            }
+                ...userEditData,
+                cart: userEditData.cart
+                    ? { connect: { id: userEditData.cart.id } }
+                    : undefined
+            },
+            include: { cart: true }
         });
         return {
             ...updatedUser,

@@ -29,14 +29,13 @@ model User {
   name     String
   role     String
 
-  Cart  Cart?
-  Order Order[]
+  cart   Cart?
+  orders Order[]
 }
 
 model OrderedShopItem {
   id              Int @id @default(autoincrement())
   priceAtPurchase Int
-  quantity        Int
 
   //relation
   ShopItem   ShopItem @relation(fields: [shopItemId], references: [id])
@@ -46,8 +45,8 @@ model OrderedShopItem {
 }
 
 model Order {
-  id         Int @id @default(autoincrement())
-  totalPrice Int
+  id    Int     @id @default(autoincrement())
+  valid Boolean
 
   //relation
   User   User @relation(fields: [userId], references: [id])
@@ -60,7 +59,7 @@ model Cart {
   id Int @id @default(autoincrement())
 
   //relation
-  User   User @relation(fields: [userId], references: [id])
+  User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int  @unique
 
   // shopItems ShopItem[]
@@ -86,9 +85,9 @@ model ShopItem {
 }
 
 model ShopItemOnCart {
-  Cart       Cart     @relation(fields: [cartId], references: [id])
+  Cart       Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
   cartId     Int
-  ShopItem   ShopItem @relation(fields: [shopItemId], references: [id])
+  ShopItem   ShopItem @relation(fields: [shopItemId], references: [id], onDelete: Cascade)
   shopItemId Int
 
   @@id([cartId, shopItemId])

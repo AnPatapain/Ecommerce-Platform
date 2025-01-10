@@ -1,0 +1,260 @@
+#!/bin/bash
+
+BASE_URL="http://localhost:8080/api"
+TOKEN="sk_e9cdfed1-c50d-4db0-8bff-7dc377bcc1ca"
+TOKEN_ADMIN="sk_4cfc01d5-dd88-48c1-a72f-9a337efb55a2"
+
+ACCOUNT="tuan@example.com"
+NAME="Tuan"
+
+ADMIN="admin@example.com"
+NAME_ADMIN="Admin"
+# Helper function to check if jq is installed
+function check_jq_installed() {
+    if ! [ -x "$(command -v jq)" ]; then
+        echo "Error: jq is not installed. Please install jq before running this script."
+        exit 1
+    fi
+}
+
+check_jq_installed
+
+function admin_signup() {
+  curl -X POST "$BASE_URL/auth/signup" \
+    -H "Content-Type: application/json" \
+    --data-raw '{
+      "email": "'"$ADMIN"'",
+      "password": "password123",
+      "name": "'"$NAME_ADMIN"'"
+    }' | jq
+}
+
+function admin_signin() {
+  curl -X POST "$BASE_URL/auth/signin" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "email": "'"$ADMIN"'",
+      "password": "password123"
+    }' | jq
+}
+
+function admin_send_verification_mail() {
+  curl -X GET "$BASE_URL/auth/send-verification-mail?email=$ADMIN" | jq
+}
+
+function auth_signup() {
+  curl -X POST "$BASE_URL/auth/signup" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "email": "'"$ACCOUNT"'",
+      "password": "password123",
+      "name": "'"$NAME"'"
+    }' | jq
+}
+
+function auth_signin() {
+  curl -X POST "$BASE_URL/auth/signin" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "email": "'$ACCOUNT'",
+      "password": "password123"
+    }' | jq
+}
+
+
+function auth_send_verification_mail() {
+  curl -X GET "$BASE_URL/auth/send-verification-mail?email=$ACCOUNT" | jq
+}
+
+function auth_verify_account() {
+  curl -X GET "$BASE_URL/auth/verify?token=VERIFICATION_TOKEN" \
+    -H "x-api-key: $TOKEN" | jq
+}
+
+function auth_send_reset_password_email() {
+  curl -X GET "$BASE_URL/auth/send-reset-password-email?email=$ACCOUNT" | jq
+}
+
+function auth_reset_password() {
+  curl -X POST "$BASE_URL/auth/reset-password" \
+    -H "x-api-key: $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "newPassword": "newpassword123"
+    }' | jq
+}
+
+function users_get_current() {
+  curl -X GET "$BASE_URL/users/current" \
+    -H "x-api-key: $TOKEN" | jq
+}
+
+function users_get_all() {
+  curl -X GET "$BASE_URL/users" \
+    -H "x-api-key: $TOKEN" | jq
+}
+
+# CART ENDPOINTS
+function cart_get() {
+  curl -X GET "$BASE_URL/cart" \
+      -H "x-api-key: $TOKEN" \
+      -H "Content-Type: application/json" | jq
+}
+
+function cart_find_item() {
+  read -r -p "Enter Item IDs (comma-separated): " ITEM_IDS
+
+  # Convert comma-separated list into URL-encoded format
+  ITEM_IDS_URL=$(echo "$ITEM_IDS" | tr ',' '\n' | sed 's/^/itemIds=/g' | paste -sd "&" -)
+
+  curl -X GET "$BASE_URL/cart?itemIds=$ITEM_IDS_URL" \
+      -H "x-api-key: $TOKEN" \
+      -H "Content-Type: application/json" | jq
+}
+
+function cart_create() {
+  curl -X POST "$BASE_URL/cart" \
+      -H "x-api-key: $TOKEN"
+}
+
+function cart_update() {
+  read -r -p "Enter Cart ID: " ID
+
+  # Validate the cart ID as an integer
+  if ! [[ "$ID" =~ ^[0-9]+$ ]]; then
+      echo "Error:ID must be a number."
+      return 1
+  fi
+
+  read -r -p "Enter Shop Item IDs to Add (comma-separated): " ITEMS_TO_ADD
+  read -r -p "Enter Shop Item IDs to Remove (comma-separated): " ITEMS_TO_REMOVE
+
+  # Validate and format shop item IDs as integers in a JSON array
+  ITEMS_TO_ADD_JSON=$(echo "$ITEMS_TO_ADD" | sed 's/, */,/g' | sed 's/\([0-9]\+\)/\1/g' | sed 's/^/[/' | sed 's/$/]/')
+  ITEMS_TO_REMOVE_JSON=$(echo "$ITEMS_TO_REMOVE" | sed 's/, */,/g' | sed 's/\([0-9]\+\)/\1/g' | sed 's/^/[/' | sed 's/$/]/')
+
+  # Ensure both arrays contain only valid integers
+  if ! [[ $ITEMS_TO_ADD_JSON =~ ^\[[0-9,]*\]$ ]] || ! [[ $ITEMS_TO_REMOVE_JSON =~ ^\[[0-9,]*\]$ ]]; then
+      echo "Error: Shop Item IDs must be numbers only."
+      return 1
+  fi
+
+  # Perform the PUT request with validated integer IDs
+  curl -X PUT "$BASE_URL/cart/$ID" \
+      -H "x-api-key: $TOKEN" \
+      -H "Content-Type: application/json" \
+      --data-raw '{
+        "shopItemsToAdd": '"$ITEMS_TO_ADD_JSON"',
+        "shopItemsToRemove": '"$ITEMS_TO_REMOVE_JSON"'
+      }' | jq
+}
+
+
+
+# SHOPITEM ENDPOINTS
+function shopitem_get_all() {
+  curl -X GET "$BASE_URL/shop-item" | jq
+}
+
+function shopitem_get_by_id() {
+  read -r -p "Enter ShopItem ID: " ID
+  curl -X GET "$BASE_URL/shop-item/$ID" | jq
+}
+
+function shopitem_create() {
+  read -r -p "Enter Item Name: " ITEM_NAME
+  read -r -p "Enter Item Description: " ITEM_DESCRIPTION
+  read -r -p "Enter Item Image URL: " ITEM_IMAGE
+  read -r -p "Enter Item Quantity: " ITEM_QUANTITY
+  read -r -p "Enter Item Price: " ITEM_PRICE
+
+  curl -X POST "$BASE_URL/shop-item" \
+    -H "x-api-key: $TOKEN_ADMIN" \
+    -H "Content-Type: application/json" \
+    --data-raw '{
+      "name": "'"$ITEM_NAME"'",
+      "description": "'"$ITEM_DESCRIPTION"'",
+      "image": "'"$ITEM_IMAGE"'",
+      "quantity": '"$ITEM_QUANTITY"',
+      "price": '"$ITEM_PRICE"'
+    }' | jq
+}
+
+function shopitem_update() {
+  read -r -p "Enter ShopItem ID: " ID
+  if ! [[ "$ID" =~ ^[0-9]+$ ]]; then
+        echo "Error:ID must be a number."
+        return 1
+    fi
+  read -r -p "Enter New Item Name: " ITEM_NAME
+  curl -X PUT "$BASE_URL/shop-item/$ID" \
+    -H "x-api-key: $TOKEN_ADMIN" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "name": "'"$ITEM_NAME"'",
+      "price": 29.99
+    }' | jq
+}
+
+function shopitem_delete() {
+  read -r -p "Enter ShopItem ID: " ID
+  if ! [[ "$ID" =~ ^[0-9]+$ ]]; then
+        echo "Error:ID must be a number."
+        return 1
+    fi
+  curl -X DELETE "$BASE_URL/shop-items/$ID" \
+    -H "x-api-key: $TOKEN_ADMIN" | jq
+}
+
+PS3="Select an API endpoint to test: "
+options=(
+  "Auth - Signup"
+  "Auth - Signin"
+  "Auth - Send Verification Mail"
+  "Auth - Verify Account"
+  "Auth - Send Reset Password Email"
+  "Auth - Reset Password"
+  "Users - Get Current"
+  "Users - Get All"
+  "Cart - Get"
+  "Cart - Create"
+  "Cart - Update"
+  "Cart - Find Item"
+  "ShopItem - Get All"
+  "ShopItem - Get By ID"
+  "ShopItem - Create"
+  "ShopItem - Update"
+  "ShopItem - Delete"
+  "Admin - Signin"
+  "Admin - Signup"
+  "Admin - Send Verification Mail"
+  "Exit"
+)
+
+select opt in "${options[@]}"; do
+  case $REPLY in
+    1) auth_signup ;;
+    2) auth_signin ;;
+    3) auth_send_verification_mail ;;
+    4) auth_verify_account ;;
+    5) auth_send_reset_password_email ;;
+    6) auth_reset_password ;;
+    7) users_get_current ;;
+    8) users_get_all ;;
+    9) cart_get ;;
+    10) cart_create ;;
+    11) cart_update ;;
+    12) cart_find_item ;;
+    13) shopitem_get_all ;;
+    14) shopitem_get_by_id ;;
+    15) shopitem_create ;;
+    16) shopitem_update ;;
+    17) shopitem_delete ;;
+    18) admin_signin ;;
+    19) admin_signup ;;
+    20) admin_send_verification_mail ;;
+    21) echo "Goodbye!"; break ;;
+    *) echo "Invalid option. Try again."; continue ;;
+  esac
+  echo -e "\n"
+done
