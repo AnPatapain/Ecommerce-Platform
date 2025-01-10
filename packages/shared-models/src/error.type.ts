@@ -21,6 +21,7 @@ type APIErrorCode =
     | 'ERR_ORDER_NOT_FOUND'
     | 'ERR_ORDERED_SHOP_ITEM_ALREADY_EXISTS'
     | 'ERR_ORDERED_SHOP_ITEM_NOT_FOUND'
+    | 'ERR_SELLER_NEED_TO_RESET_PASSWORD'
 
 const ERROR_CODE_TO_STRING: Record<APIErrorCode, string> = {
     'ERR_UNKNOWN': 'Unknown error from server',
@@ -45,6 +46,7 @@ const ERROR_CODE_TO_STRING: Record<APIErrorCode, string> = {
     'ERR_ORDER_NOT_FOUND': 'Order not found',
     'ERR_ORDERED_SHOP_ITEM_ALREADY_EXISTS': 'Ordered shop item already exists',
     'ERR_ORDERED_SHOP_ITEM_NOT_FOUND': 'Ordered shop item not found',
+    'ERR_SELLER_NEED_TO_RESET_PASSWORD': 'Seller need to reset password on the first signin'
 };
 
 
