@@ -40,12 +40,20 @@ export class UserRepository {
         const user = await PRISMA_CLIENT.user.findUnique({
             where: {
                 id: id
+            },
+            include:{
+                cart: {
+                    include: {
+                        shopItems: true
+                    }
+                }
             }
         });
 
         return user ? {
             ...user,
-            role: user.role as UserRole
+            role: user.role as UserRole,
+            cart: user.cart ? {...user.cart} : undefined
         } : null;
     }
 
