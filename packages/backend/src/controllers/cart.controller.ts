@@ -66,11 +66,11 @@ export class CartController extends Controller{
 
 
 
-    @Put('{id}')
+    @Put('')
     @Security('token', ['cart.write'])
     @SuccessResponse('200', 'OK')
     public async updateCart(
-        @Path() id: number,
+        @Request() req: express.Request,
         @Body() cartData: CartUpdateRequest,
         @Res() errCartNotFound: TsoaResponse<404, APIErrorType>,
         @Res() errShopItemNotFound: TsoaResponse<404, APIErrorType>
@@ -83,7 +83,14 @@ export class CartController extends Controller{
                 });
             }
         }
-        const existItems = await this.cartRepository.findItemsInCart(id, cartData.shopItemsToAdd);
+        const userId = getCurrentUser(req).id;
+        const cart = await this.cartRepository.findByUserId(userId);
+        if (!cart) {
+            throw errCartNotFound(404, {
+                code: 'ERR_CART_NOT_FOUND'
+            });
+        }
+        const existItems = await this.cartRepository.findItemsInCart(cart.id, cartData.shopItemsToAdd);
 
         if (existItems && existItems.shopItems.length > 0) {
             cartData.shopItemsToAdd = cartData.shopItemsToAdd.filter(
@@ -100,12 +107,6 @@ export class CartController extends Controller{
             }
         }
 
-        const cart = await this.cartRepository.findById(id);
-        if (!cart) {
-            throw errCartNotFound(404, {
-                code: 'ERR_CART_NOT_FOUND'
-            });
-        }
-        return this.cartRepository.updateOne(id, cartData);
+        return this.cartRepository.updateOne(cart.id, cartData);
     }
 }
