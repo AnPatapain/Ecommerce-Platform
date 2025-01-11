@@ -8,9 +8,10 @@ import {
     ResetPasswordRequest,
     APISuccessResponse,
     SignupSuccessResponse,
-    SellerCreationRequest, SellerCreationResponse
+    SellerCreationRequest, SellerCreationResponse, CartUpdateRequest, OrderCreationRequest
 } from "@app/shared-models/src/api.type.ts";
 import {CONFIG} from "./frontend-config.ts";
+import {Order} from "@app/shared-models/src/order.model.ts";
 
 export const apiClient = {
     user: {
@@ -33,6 +34,17 @@ export const apiClient = {
     },
     shopItem: {
         getAll: () => sendRequest('GET', 'api/shop-item'),
+        getOneById: (id: number, token: string) => sendRequest('GET', `api/shop-item/${id}`, undefined, token),
+    },
+    cart: {
+        addShopItemToCart: (data: CartUpdateRequest, token: string) =>
+            sendRequest('PUT', 'api/cart', data, token),
+        removeShopItemToCart: (data: CartUpdateRequest, token: string) =>
+            sendRequest('PUT', 'api/cart', data, token)
+    },
+    order: {
+        createOrder: (data: OrderCreationRequest, token: string): Promise<Order> =>
+            sendRequest('POST', 'api/order', data, token),
     },
     admin: {
         getAllSellers: (token: string): Promise<User[]> =>

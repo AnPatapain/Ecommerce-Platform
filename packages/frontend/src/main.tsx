@@ -18,7 +18,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword.tsx";
 import ResetPassword from "./pages/auth/ResetPassword.tsx";
 import SecuredRoute from "./pages/SecuredRoute.tsx";
 import PublicRoute from "./pages/PublicRoute.tsx";
-import OrderProduct from "./pages/user/OrderProduct.tsx";
+import MyCart from "./pages/user/MyCart.tsx";
 import AdminPagesTemplate from "./pages/admin/AdminPagesTemplate.tsx";
 import AdminManageShopItems from "./pages/admin/AdminManageShopItems.tsx";
 import AdminManageSellers from "./pages/admin/AdminManageSellers.tsx";
@@ -75,8 +75,8 @@ const router = createBrowserRouter([
                         element: <Home />,
                     },
                     {
-                        path: "order-product",
-                        element: <OrderProduct/>
+                        path: "my-cart",
+                        element: <MyCart/>
                     }
                 ],
             },

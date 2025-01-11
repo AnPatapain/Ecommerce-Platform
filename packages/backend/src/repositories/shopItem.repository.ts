@@ -16,7 +16,7 @@ export class ShopItemRepository{
     }
 
     public async findAll() : Promise<Array<ShopItem>> {
-        return await PRISMA_CLIENT.shopItem.findMany({
+        return PRISMA_CLIENT.shopItem.findMany({
             include: {
                 orderedShopItems: true,
                 carts: true
@@ -25,7 +25,7 @@ export class ShopItemRepository{
     }
 
     public async findById(id: number): Promise<ShopItem | null> {
-        return await PRISMA_CLIENT.shopItem.findUnique({
+        return PRISMA_CLIENT.shopItem.findUnique({
             where: {
                 id: id
             },
@@ -37,7 +37,7 @@ export class ShopItemRepository{
     }
 
     public async findByName(name: string): Promise<ShopItem | null> {
-        return await PRISMA_CLIENT.shopItem.findUnique({
+        return PRISMA_CLIENT.shopItem.findUnique({
             where: {
                 name: name,
             },
@@ -47,40 +47,48 @@ export class ShopItemRepository{
             }
         });
     }
+
     public async createOne(shopItemCreationData: ShopItemCreationRequest){
-        return await PRISMA_CLIENT.shopItem.create({
-            data:{
+        return PRISMA_CLIENT.shopItem.create({
+            data: {
                 name: shopItemCreationData.name,
                 price: shopItemCreationData.price,
                 description: shopItemCreationData.description,
                 image: shopItemCreationData.image,
                 quantity: shopItemCreationData.quantity,
-                orderedShopItems : undefined,
+                orderedShopItems: undefined,
                 carts: undefined,
             }
         });
     }
 
     public async updateOne(id: number, shopItemUpdateData: ShopItemUpdateRequest){
-        return await PRISMA_CLIENT.shopItem.update({
+        return PRISMA_CLIENT.shopItem.update({
             where: {
                 id: id
             },
-            data:{
-               ...shopItemUpdateData,
+            data: {
+                ...shopItemUpdateData,
                 orderedShopItems: undefined,
-                carts : undefined
+                carts: undefined
             }
         });
     }
 
     public async deleteOne(id: number){
-
-        return await PRISMA_CLIENT.shopItem.delete({
+        return PRISMA_CLIENT.shopItem.delete({
             where: {
                 id: id
             },
 
         });
+    }
+
+    public async deleteMany() {
+        return PRISMA_CLIENT.user.deleteMany({});
+    }
+
+    public async count(): Promise<number> {
+        return PRISMA_CLIENT.user.count();
     }
 }

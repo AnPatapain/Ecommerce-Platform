@@ -19,7 +19,7 @@ import {OrderRepository} from "../repositories/order.repository";
 import {ShopItemRepository} from "../repositories/shopItem.repository";
 import {APIErrorType} from "@app/shared-models/src/error.type";
 import {getCurrentUser} from "../security/auth.handler";
-import {type OrderCreationRequest} from "@app/shared-models/src/api.type";
+import {APISuccessResponse, type OrderCreationRequest} from "@app/shared-models/src/api.type";
 import {CartRepository} from "../repositories/cart.repository";
 
 
@@ -29,11 +29,7 @@ export class OrderController extends Controller{
     private shopItemRepository: ShopItemRepository = ShopItemRepository.getInstance();
     private cartRepository: CartRepository = CartRepository.getInstance();
 
-    /**
-     * Retrieve the current user's orders.
-     * @param req - The request object.
-     * @returns The current user's orders.
-     */
+
     @Get('/me')
     @Security('token', ['order:current.read'])
     @SuccessResponse('200', 'OK')
@@ -122,6 +118,53 @@ export class OrderController extends Controller{
         return order;
     }
 
+    // @Post('')
+    // @Security('token', ['order:current.write'])
+    // @SuccessResponse('201', 'Created')
+    // public async createOrder(
+    //     @Request() req: express.Request,
+    //     @Body() orderData: OrderCreationRequest,
+    //     @Res() errShopItemNotFound: TsoaResponse<404, APIErrorType>,
+    //     @Res() errCartNotFound: TsoaResponse<404, APIErrorType>,
+    //     @Res() errShopItemInvalidStock: TsoaResponse<400, APIErrorType>,
+    // ){
+    //     const currentUser = getCurrentUser(req);
+    //     for(const shopItem of orderData.shopItems){
+    //         const shopItemFound = await this.shopItemRepository.findById(shopItem.id);
+    //         if (!shopItemFound) {
+    //             throw errShopItemNotFound(404, {
+    //                 code: 'ERR_SHOP_ITEM_NOT_FOUND'
+    //             });
+    //         }
+    //         if (shopItemFound.quantity < 0) {
+    //             throw errShopItemInvalidStock(400, {
+    //                 code: 'ERR_SHOP_ITEM_INVALID_STOCK'
+    //             });
+    //         }
+    //     }
+    //
+    //     const createdOrder = await this.orderRepository.createOne({
+    //         userId: currentUser.id,
+    //         shopItems: orderData.shopItems,
+    //     });
+    //
+    //     // Remove corresponding item in cart
+    //     const cartController = new CartController();
+    //     await cartController.updateCart(
+    //         req,
+    //         {
+    //             shopItemsToAdd: [],
+    //             shopItemsToRemove: [...orderData.shopItems.map(item => item.id)]
+    //         },
+    //         errCartNotFound,
+    //         errShopItemNotFound
+    //     )
+    //
+    //
+    //     return createdOrder
+    // }
+    //
+
     ////////////////
     // Seller routes
 
@@ -164,6 +207,7 @@ export class OrderController extends Controller{
     /**
      * Validate an order by order ID.
      * @param orderId - The ID of the order.
+     * @param errOrderAlreadyValidated
      * @param errOrderNotFound - Response if the order is not found.
      * @param errShopItemNotFound - Response if a shop item is not found.
      * @param errShopItemInvalidStock - Response if a shop item has invalid stock.
@@ -175,10 +219,11 @@ export class OrderController extends Controller{
     @Tags('Order/Seller')
     public async validateOrder(
         @Path() orderId: number,
+        @Res() errOrderAlreadyValidated: TsoaResponse<400, APIErrorType>,
         @Res() errOrderNotFound: TsoaResponse<404, APIErrorType>,
         @Res() errShopItemNotFound: TsoaResponse<404, APIErrorType>,
         @Res() errShopItemInvalidStock: TsoaResponse<400, APIErrorType>,
-    )
+    ): Promise<APISuccessResponse>
     {
         const order = await this.orderRepository.findOneById(orderId);
         if (!order) {
@@ -187,7 +232,7 @@ export class OrderController extends Controller{
             });
         }
         if (order.valid){
-            return "Order already validated";
+            throw errOrderAlreadyValidated(400, {code: 'ERR_ORDER_ALREADY_VALIDATED'});
         }
 
         for(const orderedShopItem of order.orderedShopItems){
@@ -205,10 +250,10 @@ export class OrderController extends Controller{
             await this.shopItemRepository.updateOne(shopItem.id, {quantity: shopItem.quantity - 1});
         }
         await this.orderRepository.validateOne(orderId);
-        return "Order validated"
+        return {
+            success: true
+        }
     }
-
-
 
 
 }

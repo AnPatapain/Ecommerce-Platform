@@ -16,7 +16,7 @@ export class CartRepository {
     }
 
     public async findAll() : Promise<Array<Cart>> {
-        return await PRISMA_CLIENT.cart.findMany({
+        return PRISMA_CLIENT.cart.findMany({
             include: {
                 shopItems: true,
             }
@@ -24,13 +24,13 @@ export class CartRepository {
     }
 
     public async findById(id: number): Promise<Cart | null> {
-        return await PRISMA_CLIENT.cart.findUnique({
+        return PRISMA_CLIENT.cart.findUnique({
             where: {
                 id: id
             },
             include: {
                 shopItems: {
-                    include:{
+                    include: {
                         ShopItem: true,
                     }
                 },
@@ -38,13 +38,13 @@ export class CartRepository {
         });
     }
     public async findByUserId(userId: number): Promise<Cart | null> {
-        return await PRISMA_CLIENT.cart.findUnique({
+        return PRISMA_CLIENT.cart.findUnique({
             where: {
                 userId: userId
             },
             include: {
                 shopItems: {
-                    include:{
+                    include: {
                         ShopItem: true,
                     }
                 },
@@ -53,7 +53,7 @@ export class CartRepository {
     }
 
     public async findItemsInCart(id: number,itemIds: number[]) {
-        return await PRISMA_CLIENT.cart.findUnique({
+        return PRISMA_CLIENT.cart.findUnique({
             where: {
                 id: id,
                 shopItems: {
@@ -63,9 +63,9 @@ export class CartRepository {
                         }
                     }
                 }
-            },include: {
+            }, include: {
                 shopItems: {
-                    include:{
+                    include: {
                         ShopItem: true,
                     }
                 },
@@ -74,11 +74,11 @@ export class CartRepository {
     }
 
     public async createOne(cartCreationData: CartCreationRequest): Promise<Cart>{
-        return await PRISMA_CLIENT.cart.create({
-            data:{
+        return PRISMA_CLIENT.cart.create({
+            data: {
                 userId: cartCreationData.userId,
                 shopItems: {
-                    create:[]
+                    create: []
                 },
             },
             include: {
@@ -88,14 +88,14 @@ export class CartRepository {
     }
 
     public async updateOne(id: number, cartData: CartUpdateRequest) {
-        return await PRISMA_CLIENT.cart.update({
-            where: { id: id },
+        return PRISMA_CLIENT.cart.update({
+            where: {id: id},
             data: {
                 shopItems: {
                     // Safely handle adding new items
                     create: (cartData.shopItemsToAdd ?? []).map((itemId) => ({
                         ShopItem: {
-                            connect: { id: itemId }
+                            connect: {id: itemId}
                         }
                     })),
                     // Safely handle removing items
@@ -104,7 +104,7 @@ export class CartRepository {
                     }))
                 }
             },
-            include: { shopItems: true },
+            include: {shopItems: true},
         });
     }
 

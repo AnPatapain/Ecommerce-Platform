@@ -2,6 +2,7 @@
 import {PRISMA_CLIENT} from "../../prisma";
 import {Order} from "@app/shared-models/src/order.model";
 import {OrderCreationRequest} from "@app/shared-models/src/api.type";
+import {ShopItem} from "@app/shared-models/src/shopItem.model";
 
 export class OrderRepository{
     private static instance: OrderRepository | null = null;
@@ -15,14 +16,14 @@ export class OrderRepository{
     }
 
     public async findAll() : Promise<Array<Order>> {
-        return await PRISMA_CLIENT.order.findMany({
+        return PRISMA_CLIENT.order.findMany({
             include: {
                 orderedShopItems: true,
             }
         });
     }
     public async findOneById(id: number): Promise<Order | null> {
-        return await PRISMA_CLIENT.order.findUnique({
+        return PRISMA_CLIENT.order.findUnique({
             where: {
                 id: id
             },
@@ -34,7 +35,7 @@ export class OrderRepository{
 
 
     public async findOneByUserId(id:number, userId: number): Promise<Order | null> {
-        return await PRISMA_CLIENT.order.findUnique({
+        return PRISMA_CLIENT.order.findUnique({
             where: {
                 id: id,
                 userId: userId
@@ -46,7 +47,7 @@ export class OrderRepository{
     }
 
     public async findAllByUserId(userId: number): Promise<Array<Order> | null> {
-        return await PRISMA_CLIENT.order.findMany({
+        return PRISMA_CLIENT.order.findMany({
             where: {
                 userId: userId
             },
@@ -56,17 +57,17 @@ export class OrderRepository{
         });
     }
 
-    public async createOne(orderCreationData: OrderCreationRequest): Promise<Order> {
-
-
-
-        return await PRISMA_CLIENT.order.create({
+    public async createOne(orderCreationData: {
+        userId: number,
+        shopItems: Array<ShopItem>
+    }): Promise<Order> {
+        return PRISMA_CLIENT.order.create({
             data: {
                 userId: orderCreationData.userId,
                 valid: false,
                 orderedShopItems: {
                     create: orderCreationData.shopItems.map(shopItem => (
-                         {
+                        {
                             shopItemId: shopItem.id,
                             priceAtPurchase: shopItem.price
                         }
@@ -79,8 +80,8 @@ export class OrderRepository{
         });
     }
     public async validateOne(id: number){
-        return await PRISMA_CLIENT.order.update({
-            where: { id: id },
+        return PRISMA_CLIENT.order.update({
+            where: {id: id},
             data: {
                 valid: true
             }
@@ -127,7 +128,7 @@ export class OrderRepository{
     // }
 
     public async deleteOne(id: number){
-        return await PRISMA_CLIENT.order.delete({
+        return PRISMA_CLIENT.order.delete({
             where: {
                 id: id
             }
