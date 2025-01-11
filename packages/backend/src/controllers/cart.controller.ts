@@ -12,7 +12,7 @@ import {
     Body,
     SuccessResponse, Post,
     Request,
-    Query,
+    Query, Tags,
 } from "tsoa";
 import {APIErrorType} from "@app/shared-models/src/error.type";
 import { CartRepository } from "../repositories/cart.repository";
@@ -22,13 +22,22 @@ import { UserRepository } from "../repositories/user.repository";
 import {type CartUpdateRequest} from "@app/shared-models/src/api.type";
 
 @Route('/api/cart')
+@Tags('Cart')
 export class CartController extends Controller{
     private cartRepository: CartRepository = CartRepository.getInstance();
     private userRepository: UserRepository = UserRepository.getInstance();
     private shopItemRepository: ShopItemRepository = ShopItemRepository.getInstance();
 
+
+    /**
+     * Send a reset password email to the user.
+     * @returns A mail verification response containing the mail preview URL.
+     * @param req
+     * @param errCartNotFound
+     */
+
     @Get('')
-    @Security('token', ['cart.read'])
+    @Security('token', ['cart:current.read'])
     @SuccessResponse('200', 'OK')
     public async getCart(
         @Request() req: express.Request,
@@ -44,9 +53,14 @@ export class CartController extends Controller{
         }
         return cart;
     }
-
+    /**
+     * Create a new cart for the current user.
+     * @param req - The request object.
+     * @param errCartAlreadyExists - Response if the cart already exists.
+     * @returns The created cart.
+     */
     @Post('')
-    @Security('token', ['cart.write'])
+    @Security('token', ['cart:current.write'])
     @SuccessResponse('201', 'Created')
     public async createCart(
         @Request() req: express.Request,
@@ -65,9 +79,16 @@ export class CartController extends Controller{
     }
 
 
-
+    /**
+     * Update the current user's cart.
+     * @param req - The request object.
+     * @param cartData - The cart update request containing items to add or remove.
+     * @param errCartNotFound - Response if the cart is not found.
+     * @param errShopItemNotFound - Response if a shop item is not found.
+     * @returns The updated cart.
+     */
     @Put('')
-    @Security('token', ['cart.write'])
+    @Security('token', ['cart:current.write'])
     @SuccessResponse('200', 'OK')
     public async updateCart(
         @Request() req: express.Request,
@@ -90,6 +111,7 @@ export class CartController extends Controller{
                 code: 'ERR_CART_NOT_FOUND'
             });
         }
+
         const existItems = await this.cartRepository.findItemsInCart(cart.id, cartData.shopItemsToAdd);
 
         if (existItems && existItems.shopItems.length > 0) {

@@ -36,7 +36,6 @@ export async function expressAuthentication(
                 throw new APIError(403, 'ERR_PERMISSION_DENIED');
             }
         }
-
         req.securityContext = {
             user: user,
             scopes: userScopes,

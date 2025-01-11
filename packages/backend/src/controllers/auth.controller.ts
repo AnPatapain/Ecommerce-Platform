@@ -1,4 +1,17 @@
-import {Body, Controller, Get, NoSecurity, Post, Query, Request, Res, Route, Security, type TsoaResponse} from "tsoa";
+import {
+    Body,
+    Controller,
+    Get,
+    NoSecurity,
+    Post,
+    Query,
+    Request,
+    Res,
+    Route,
+    Security,
+    Tags,
+    type TsoaResponse
+} from "tsoa";
 import {
     type SigninRequest,
     type APITokenResponse,
@@ -20,11 +33,18 @@ import {getCurrentUser} from "../security/auth.handler";
 import {CartRepository} from "../repositories/cart.repository";
 
 @Route('/api/auth')
+@Tags('Auth')
 export class AuthController extends Controller {
     private userRepository: UserRepository = UserRepository.getInstance();
     private tokenRepository: TokenRepository = TokenRepository.getInstance();
     private cartRepository: CartRepository = CartRepository.getInstance();
 
+    /**
+     * Signup a new user.
+     * @param requestBody - The signup request containing email, password, and name.
+     * @param errUserAlreadyExisted - Response if the user already exists.
+     * @returns The created user and a mail preview URL.
+     */
     @Post('signup')
     @NoSecurity()
     public async signup(
@@ -54,6 +74,14 @@ export class AuthController extends Controller {
         };
     }
 
+    /**
+     * Send a reset password email to the user.
+     * @param email - The email of the user to send the reset password email to.
+     * @param errUserNotFound - Response if the user is not found.
+     * @param errUserAlreadyVerified
+     * @returns A mail verification response containing the mail preview URL.
+     */
+
     @Get('send-verification-mail')
     @NoSecurity()
     public async sendVerifyAccountEmail(
@@ -77,6 +105,13 @@ export class AuthController extends Controller {
             mailPreviewUrl: mailPreviewUrl
         };
     }
+
+    /**
+     * Verify the user's account using a token.
+     * @param req - The request object.
+     * @param token - The verification token.
+     * @returns An API token response containing the API access token.
+     */
 
     @Get('verify')
     @Security('token', ['user:current.verify'])
@@ -103,6 +138,14 @@ export class AuthController extends Controller {
             apiAccessToken: apiToken,
         };
     }
+
+    /**
+     * Signin a user.
+     * @param requestBody - The signin request containing email and password.
+     * @param errUsernameOrPasswordInvalid - Response if the username or password is invalid.
+     * @param errUserNotVerified - Response if the user is not verified.
+     * @returns An API token response containing the API access token.
+     */
 
     @Post('signin')
     @NoSecurity()
@@ -139,6 +182,14 @@ export class AuthController extends Controller {
         };
     }
 
+
+    /**
+     * Send a reset password email to the user.
+     * @param email - The email of the user to send the reset password email to.
+     * @param errUserNotFound - Response if the user is not found.
+     * @returns A mail verification response containing the mail preview URL.
+     */
+
     @Get('send-reset-password-email')
     public async sendResetPasswordEmail(
         @Query() email: string,
@@ -156,6 +207,12 @@ export class AuthController extends Controller {
         };
     }
 
+    /**
+     * Reset the user's password.
+     * @param req - The request object.
+     * @param requestBody - The reset password request containing the new password.
+     * @returns An API success response indicating the operation was successful.
+     */
     @Post('reset-password')
     @Security('token', ['user:current.write'])
     public async resetPassword(

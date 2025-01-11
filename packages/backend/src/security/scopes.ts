@@ -11,11 +11,12 @@ export type SecurityScope =
     | 'token:current.write' // write all token belong to you
     | 'shopItem.read'
     | 'shopItem.write'
-    | 'cart.read'
-    | 'cart.write'
+    | 'cart:current.read'
+    | 'cart:current.write'
     | 'order:current.read'
     | 'order.read'
     | 'order.write'
+    | 'order:current.write';
 
 
 export const API_VERIFICATION_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
@@ -35,9 +36,10 @@ export const BASE_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
 
 export const USER_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
     ...BASE_SCOPES,
-    'cart.read',
-    'cart.write',
+    'cart:current.read',
+    'cart:current.write',
     'order:current.read',
+    'order:current.write',
 ]);
 
 export const SELLER_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
