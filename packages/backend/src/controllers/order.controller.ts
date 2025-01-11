@@ -18,7 +18,9 @@ import {OrderRepository} from "../repositories/order.repository";
 import {ShopItemRepository} from "../repositories/shopItem.repository";
 import {APIErrorType} from "@app/shared-models/src/error.type";
 import {getCurrentUser} from "../security/auth.handler";
-import {type OrderCreationRequest} from "@app/shared-models/src/api.type";
+import {APISuccessResponse, type OrderCreationRequest} from "@app/shared-models/src/api.type";
+import {CartRepository} from "../repositories/cart.repository";
+import {CartController} from "./cart.controller";
 
 
 @Route('/api/order')
@@ -81,15 +83,16 @@ export class OrderController extends Controller{
         return order;
     }
 
-    @Post('/{orderId}')
+    @Put('/{orderId}')
     @Security('token', ['order.write'])
     @SuccessResponse('200', 'OK')
     public async validateOrder(
         @Path() orderId: number,
+        @Res() errOrderAlreadyValidated: TsoaResponse<400, APIErrorType>,
         @Res() errOrderNotFound: TsoaResponse<404, APIErrorType>,
         @Res() errShopItemNotFound: TsoaResponse<404, APIErrorType>,
         @Res() errShopItemInvalidStock: TsoaResponse<400, APIErrorType>,
-    )
+    ): Promise<APISuccessResponse>
     {
         const order = await this.orderRepository.findOneById(orderId);
         if (!order) {
@@ -98,7 +101,7 @@ export class OrderController extends Controller{
             });
         }
         if (order.valid){
-            return "Order already validated";
+            throw errOrderAlreadyValidated(400, {code: 'ERR_ORDER_ALREADY_VALIDATED'});
         }
 
         for(const orderedShopItem of order.orderedShopItems){
@@ -116,17 +119,22 @@ export class OrderController extends Controller{
             await this.shopItemRepository.updateOne(shopItem.id, {quantity: shopItem.quantity - 1});
         }
         await this.orderRepository.validateOne(orderId);
-        return "Order validated"
+        return {
+            success: true
+        }
     }
 
     @Post('')
-    @Security('token', ['order.write'])
+    @Security('token', ['order:current.write'])
     @SuccessResponse('201', 'Created')
     public async createOrder(
+        @Request() req: express.Request,
         @Body() orderData: OrderCreationRequest,
         @Res() errShopItemNotFound: TsoaResponse<404, APIErrorType>,
+        @Res() errCartNotFound: TsoaResponse<404, APIErrorType>,
         @Res() errShopItemInvalidStock: TsoaResponse<400, APIErrorType>,
     ){
+        const currentUser = getCurrentUser(req);
         for(const shopItem of orderData.shopItems){
             const shopItemFound = await this.shopItemRepository.findById(shopItem.id);
             if (!shopItemFound) {
@@ -141,9 +149,24 @@ export class OrderController extends Controller{
             }
         }
 
-        return await this.orderRepository.createOne(orderData);
+        const createdOrder = await this.orderRepository.createOne({
+            userId: currentUser.id,
+            shopItems: orderData.shopItems,
+        });
 
+        // Remove corresponding item in cart
+        const cartController = new CartController();
+        await cartController.updateCart(
+            req,
+            {
+                shopItemsToAdd: [],
+                shopItemsToRemove: [...orderData.shopItems.map(item => item.id)]
+            },
+            errCartNotFound,
+            errShopItemNotFound
+        )
+
+
+        return createdOrder
     }
-
-
 }

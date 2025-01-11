@@ -21,8 +21,6 @@ export type CartUpdateRequest = {
 }
 // order
 export type OrderCreationRequest = {
-    valid : boolean,
-    userId: number,
     shopItems: Array<ShopItem>,
 }
 export type OrderUpdateRequest = {

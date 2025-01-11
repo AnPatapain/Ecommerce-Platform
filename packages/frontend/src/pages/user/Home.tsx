@@ -8,27 +8,35 @@ import {toast} from "react-toastify";
 export const Home = () => {
     const [shopItems, setShopItems] = useState<ShopItem[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const {token, currentUser} = useAuth();
+    const {token, currentUser, reloadCurrentUser} = useAuth();
     const [isProcessing, setIsProcessing] = useState(false);
-
-    console.log('currentUser::', currentUser);
 
     useEffect(() => {
         async function fetchShopItems() {
             try {
                 const shopItems_ = await apiClient.shopItem.getAll();
                 setShopItems(shopItems_);
-            } catch(error: any) {
+            } catch (error: any) {
                 setError(error.toString());
             }
         }
+
         fetchShopItems();
     }, []);
 
     const handleAddToCart = async (shopItem: ShopItem) => {
-        if(!token) {
+        if (!token) {
             toast.info(`Please signin to add ${shopItem.name} to cart`);
             return;
+        }
+        if (currentUser && currentUser.cart && currentUser.cart.shopItems) {
+            if (
+                currentUser.cart.shopItems.find(
+                    (existingShopItem => existingShopItem.shopItemId === shopItem.id))
+            ) {
+                toast.info(`You have already added this item in cart. Please order it.`);
+                return;
+            }
         }
         try {
             setIsProcessing(true);
@@ -36,6 +44,7 @@ export const Home = () => {
                 shopItemsToAdd: [shopItem.id],
                 shopItemsToRemove: [],
             }, token);
+            await reloadCurrentUser();
             setIsProcessing(false);
             toast.success('Product is added to cart successfully.');
         } catch (error: any) {
@@ -45,15 +54,16 @@ export const Home = () => {
     }
 
     return (
-        <Container size={'xl'}>
+        <Container size={'md'} mt={'xl'}>
+            <h2>Our products</h2>
             <Grid>
                 {
                     shopItems.map((shopItem: ShopItem) => (
-                        <Grid.Col span={3} key={shopItem.id}>
+                        <Grid.Col span={4} key={shopItem.id}>
                             <Card shadow="sm"
                                   padding="lg"
                                   radius="md" withBorder
-                                  style={{ height: '100%'}}
+                                  style={{height: '100%'}}
                             >
                                 <Card.Section>
                                     <Image
@@ -77,7 +87,7 @@ export const Home = () => {
                                         loaderProps={{type: 'dots'}}
                                         fullWidth
                                         radius="md"
-                                        style={{ marginTop: 'auto' }}
+                                        style={{marginTop: 'auto'}}
                                         onClick={() => {
                                             handleAddToCart(shopItem)
                                         }}

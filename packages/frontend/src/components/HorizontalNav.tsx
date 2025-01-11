@@ -1,5 +1,5 @@
-import {Badge, Burger, Center, Container, Group, Menu, NavLink} from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import {Badge, Burger, Center, Container, Group, Indicator, Menu, NavLink} from '@mantine/core';
+import {useDisclosure} from '@mantine/hooks';
 import classes from './HorizontalNav.module.css';
 import {useAuth} from "../auth.context.tsx";
 import {User} from "@app/shared-models/src/user.model.ts";
@@ -7,8 +7,8 @@ import AppLink from "./AppLink.tsx";
 import {useNavigate} from "react-router-dom";
 import {toast} from "react-toastify";
 
-import { CiShoppingCart } from "react-icons/ci";
-import { AiOutlineProduct } from "react-icons/ai";
+import {CiShoppingCart} from "react-icons/ci";
+import {AiOutlineProduct} from "react-icons/ai";
 
 type NavLink = {
     link: string;
@@ -19,37 +19,35 @@ type NavLink = {
 
 
 function getLinksForNavBar(user: User | null): NavLink[] {
-    if(user) {
+    if (user) {
         return [
-            { link: '/my-orders', label: 'My Orders', icon: AiOutlineProduct },
-            { link: '/my-carts', label: 'My Carts', icon: CiShoppingCart },
+            {link: '/my-orders', label: 'My Orders', icon: AiOutlineProduct},
+            {link: '/my-cart', label: 'My Carts', icon: CiShoppingCart},
             {
                 link: '#2',
                 label: user.name,
                 links: [
-                    { link: '/my-profile', label: 'My Profile' },
-                    { link: '/signout', label: 'Sign out' },
+                    {link: '/my-profile', label: 'My Profile'},
+                    {link: '/signout', label: 'Sign out'},
                 ],
                 icon: undefined
             },
         ];
     } else {
         return [
-            { link: '/signin', label: 'Sign in', icon: undefined },
-            { link: '/signup', label: 'Sign up', icon: undefined },
+            {link: '/signin', label: 'Sign in', icon: undefined},
+            {link: '/signup', label: 'Sign up', icon: undefined},
         ];
     }
 }
 
 
 export default function HorizontalNav() {
-    const [opened, { toggle }] = useDisclosure(false);
+    const [opened, {toggle}] = useDisclosure(false);
     const {currentUser, signout} = useAuth();
 
     const links: NavLink[] = getLinksForNavBar(currentUser);
     const navigate = useNavigate();
-
-    console.log(links);
 
     const items = links.map((link) => {
         const menuItems = link.links?.map((item) => (
@@ -73,7 +71,7 @@ export default function HorizontalNav() {
 
         if (menuItems) {
             return (
-                <Menu key={link.label} trigger="hover" transitionProps={{ exitDuration: 0 }} withinPortal>
+                <Menu key={link.label} trigger="hover" transitionProps={{exitDuration: 0}} withinPortal>
                     <Menu.Target>
                         <Badge size="lg">
                             <Center>
@@ -86,6 +84,41 @@ export default function HorizontalNav() {
             );
         }
 
+        if (link.label === 'My Carts') {
+            if(currentUser && currentUser.cart && currentUser.cart.shopItems.length > 0) {
+                const numShopItemsInCart = currentUser.cart.shopItems.length;
+                return <a
+                    key={link.label}
+                    href={link.link}
+                    className={classes.link}
+                    onClick={(event: any) => {
+                        event.preventDefault();
+                        navigate(link.link);
+                    }}
+                >
+
+                    {link.icon && <Indicator processing inline size={16} label={numShopItemsInCart.toString()} className={classes.linkIcon}>
+                        <link.icon className={classes.linkIcon}/>
+                    </Indicator>}
+                    {link.label}
+                </a>
+            }
+
+            return <a
+                key={link.label}
+                href={link.link}
+                className={classes.link}
+                onClick={(event: any) => {
+                    event.preventDefault();
+                    navigate(link.link);
+                }}
+            >
+
+                {link.icon && <link.icon className={classes.linkIcon}/>}
+                {link.label}
+            </a>
+        }
+
         return (
             <a
                 key={link.label}
@@ -96,7 +129,7 @@ export default function HorizontalNav() {
                     navigate(link.link);
                 }}
             >
-                {link.icon && <link.icon className={classes.linkIcon} />}
+                {link.icon && <link.icon className={classes.linkIcon}/>}
                 {link.label}
             </a>
         );
@@ -112,7 +145,7 @@ export default function HorizontalNav() {
                     <Group gap={5} visibleFrom="sm">
                         {items}
                     </Group>
-                    <Burger opened={opened} onClick={toggle} size="sm" hiddenFrom="sm" />
+                    <Burger opened={opened} onClick={toggle} size="sm" hiddenFrom="sm"/>
                 </div>
             </Container>
         </header>

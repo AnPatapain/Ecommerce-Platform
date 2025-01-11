@@ -9,6 +9,7 @@ const API_KEY_LOCALSTORAGE_KEY = 'x-api-key';
 interface AuthContextType {
     finishLoadingAuthContext: boolean;
     currentUser: User | null;
+    reloadCurrentUser: () => Promise<void>;
     token: string | null;
     signup: (email: string, name: string, password: string) => Promise<SignupSuccessResponse>;
     signin: (email: string, password: string) => Promise<User>;
@@ -46,6 +47,23 @@ export const AuthProvider = ({children}: { children: any }) => {
         }
         fetchCurrentUser();
     }, [token]);
+
+    const reloadCurrentUser = async () => {
+        if (token) {
+            try {
+                setFinishLoadingAuthContext(false);
+                const user = await apiClient.user.getCurrent(token);
+                setCurrentUser(user);
+                setFinishLoadingAuthContext(true);
+            } catch (error) {
+                console.error('AuthContext::', error);
+                setFinishLoadingAuthContext(true);
+                signout();
+            }
+        } else {
+            setFinishLoadingAuthContext(true);
+        }
+    }
 
     const signup = async (name: string, email: string, password: string): Promise<SignupSuccessResponse> => {
         try {
@@ -125,6 +143,7 @@ export const AuthProvider = ({children}: { children: any }) => {
         value={{
             finishLoadingAuthContext: finishLoadingAuthContext,
             currentUser,
+            reloadCurrentUser,
             token,
             signup,
             signin,

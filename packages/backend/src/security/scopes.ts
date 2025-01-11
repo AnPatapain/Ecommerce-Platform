@@ -14,6 +14,7 @@ export type SecurityScope =
     | 'cart.read'
     | 'cart.write'
     | 'order:current.read'
+    | 'order:current.write'
     | 'order.read'
     | 'order.write'
 
@@ -38,6 +39,7 @@ export const USER_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
     'cart.read',
     'cart.write',
     'order:current.read',
+    'order:current.write'
 ]);
 
 export const SELLER_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
