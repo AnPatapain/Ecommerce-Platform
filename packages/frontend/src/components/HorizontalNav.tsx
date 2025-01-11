@@ -44,7 +44,7 @@ function getLinksForNavBar(user: User | null): NavLink[] {
 
 export default function HorizontalNav() {
     const [opened, {toggle}] = useDisclosure(false);
-    const {currentUser, signout} = useAuth();
+    const {currentUser, signout, historicalOrderedShopItems} = useAuth();
 
     const links: NavLink[] = getLinksForNavBar(currentUser);
     const navigate = useNavigate();
@@ -98,6 +98,41 @@ export default function HorizontalNav() {
                 >
 
                     {link.icon && <Indicator processing inline size={16} label={numShopItemsInCart.toString()} className={classes.linkIcon}>
+                        <link.icon className={classes.linkIcon}/>
+                    </Indicator>}
+                    {link.label}
+                </a>
+            }
+
+            return <a
+                key={link.label}
+                href={link.link}
+                className={classes.link}
+                onClick={(event: any) => {
+                    event.preventDefault();
+                    navigate(link.link);
+                }}
+            >
+
+                {link.icon && <link.icon className={classes.linkIcon}/>}
+                {link.label}
+            </a>
+        }
+
+        if (link.label === 'My Orders') {
+            if(historicalOrderedShopItems.length > 0) {
+                const numShopItemNotValidated = historicalOrderedShopItems.filter(s => !s.valid).length;
+                return <a
+                    key={link.label}
+                    href={link.link}
+                    className={classes.link}
+                    onClick={(event: any) => {
+                        event.preventDefault();
+                        navigate(link.link);
+                    }}
+                >
+
+                    {link.icon && <Indicator processing inline size={16} label={numShopItemNotValidated.toString()} className={classes.linkIcon}>
                         <link.icon className={classes.linkIcon}/>
                     </Indicator>}
                     {link.label}

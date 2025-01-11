@@ -9,7 +9,7 @@ import {toast} from "react-toastify";
 
 
 export default function MyCart() {
-    const {token, currentUser, reloadCurrentUser} = useAuth();
+    const {token, currentUser, reloadAuthContext} = useAuth();
     const [shopItems, setShopItems] = useState<ShopItem[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [isProcessingDelete, setIsProcessingDelete] = useState<boolean>(false);
@@ -44,7 +44,7 @@ export default function MyCart() {
                 shopItemsToAdd: [],
                 shopItemsToRemove: [id]
             }, token as string);
-            await reloadCurrentUser();
+            await reloadAuthContext();
             setIsProcessingDelete(false);
             toast.info('Item is remove from cart successfully!');
         } catch(error: any) {
@@ -54,13 +54,12 @@ export default function MyCart() {
     }
 
     const order = async() => {
-        console.log('shopItems to be ordered::', shopItems);
         try {
             setIsProcessingOrder(true);
             await apiClient.order.createOrder({
                 shopItems: [...shopItems]
             }, token as string);
-            await reloadCurrentUser();
+            await reloadAuthContext();
             setIsProcessingOrder(false);
             toast.success('Your order will be processed by our seller. Thanks for your purchase!');
         } catch (error: any) {

@@ -12,11 +12,13 @@ import {
 } from "@app/shared-models/src/api.type.ts";
 import {CONFIG} from "./frontend-config.ts";
 import {Order} from "@app/shared-models/src/order.model.ts";
+import {ShopItem} from "@app/shared-models/src/shopItem.model.ts";
 
 export const apiClient = {
     user: {
         getAll: (token: string): Promise<Array<User>> => sendRequest('GET', 'api/users', undefined, token),
         getCurrent: (token: string): Promise<User> => sendRequest('GET', 'api/users/current', undefined, token),
+        getOneById: (userId: number, token: string): Promise<User | null> => sendRequest('GET', `api/users/${userId}`, undefined, token),
     },
     auth: {
         signup: (data: SignupRequest): Promise<SignupSuccessResponse> =>
@@ -34,7 +36,7 @@ export const apiClient = {
     },
     shopItem: {
         getAll: () => sendRequest('GET', 'api/shop-item'),
-        getOneById: (id: number, token: string) => sendRequest('GET', `api/shop-item/${id}`, undefined, token),
+        getOneById: (id: number, token: string): Promise<ShopItem> => sendRequest('GET', `api/shop-item/${id}`, undefined, token),
     },
     cart: {
         addShopItemToCart: (data: CartUpdateRequest, token: string) =>
@@ -45,6 +47,10 @@ export const apiClient = {
     order: {
         createOrder: (data: OrderCreationRequest, token: string): Promise<Order> =>
             sendRequest('POST', 'api/order', data, token),
+        getMyOrders: (token: string): Promise<Order[]> =>
+            sendRequest('GET', 'api/order/me', undefined, token),
+        getAllOrders: (token: string): Promise<Order[]> =>
+            sendRequest('GET', 'api/order', undefined, token),
     },
     admin: {
         getAllSellers: (token: string): Promise<User[]> =>

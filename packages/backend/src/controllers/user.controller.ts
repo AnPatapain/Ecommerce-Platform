@@ -70,6 +70,12 @@ export class UserController extends Controller {
         };
     }
 
+    @Get('{userId}')
+    @Security('token', ['user.read'])
+    public async getUserById(userId: number): Promise<User | null> {
+        return await this.userRepository.findOneById(userId);
+    }
+
 
     /**
      * Retrieve all users by role.

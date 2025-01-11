@@ -1,4 +1,4 @@
-import {Button, Flex, Group, Table} from "@mantine/core";
+import {Button, Flex, Group, Image, Table} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {ShopItem} from "@app/shared-models/src/shopItem.model.ts";
 import {apiClient} from "../../api-client.ts";
@@ -37,7 +37,15 @@ export default function AdminManageShopItems() {
                     shopItems.map((shopItem) => (
                         <Table.Tr key={shopItem.id}>
                             <Table.Td>{shopItem.id}</Table.Td>
-                            <Table.Td>{shopItem.image}</Table.Td>
+                            <Table.Td>
+                                <Image
+                                    src={shopItem.image}
+                                    alt={shopItem.name}
+                                    width={100}
+                                    height={50}
+                                    radius="sm"
+                                />
+                            </Table.Td>
                             <Table.Td>{shopItem.name}</Table.Td>
                             <Table.Td>{shopItem.description}</Table.Td>
                             <Table.Td>{shopItem.quantity}</Table.Td>

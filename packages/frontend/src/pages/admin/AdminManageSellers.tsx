@@ -1,4 +1,4 @@
-import {Alert, Button, Flex, Group, Modal, Table, Text, TextInput} from "@mantine/core";
+import {Alert, Badge, Button, Flex, Group, Modal, Table, Text, TextInput} from "@mantine/core";
 import {User} from "@app/shared-models/src/user.model.ts";
 import {useEffect, useState} from "react";
 import {apiClient} from "../../api-client.ts";
@@ -19,7 +19,6 @@ export default function AdminManageSellers() {
     const {token} = useAuth();
     const [error, setError] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
-    const [addDone, setAddDone] = useState<boolean>(false);
 
     const form = useForm({
         initialValues: {
@@ -49,7 +48,6 @@ export default function AdminManageSellers() {
                 password: DEFAULT_SELLER_PASSWORD
             }, token as string);
             setIsProcessing(false);
-            setAddDone(true);
             const updatedSellers = await apiClient.admin.getAllSellers(token as string);
             setSellers(updatedSellers);
             toast.success('Seller is added successfully!');
@@ -83,7 +81,7 @@ export default function AdminManageSellers() {
                         <Table.Th>Email</Table.Th>
                         <Table.Th>Name</Table.Th>
                         <Table.Th>Role</Table.Th>
-                        <Table.Th>Verified</Table.Th>
+                        <Table.Th>State</Table.Th>
                         <Table.Th>Action</Table.Th>
                     </Table.Tr>
                 </Table.Thead>
@@ -94,7 +92,9 @@ export default function AdminManageSellers() {
                             <Table.Td>{seller.email}</Table.Td>
                             <Table.Td>{seller.name}</Table.Td>
                             <Table.Td>{seller.role}</Table.Td>
-                            <Table.Td>{seller.verified.toString()}</Table.Td>
+                            <Table.Td>{
+                                seller.verified ? <Badge color={'green'}>active account</Badge> : <Badge color={'gray'}>account inactive</Badge>
+                            }</Table.Td>
                             <Table.Td>
                                 <Group>
                                     <Button
@@ -131,7 +131,7 @@ export default function AdminManageSellers() {
                             placeholder="Seller 1"
                             {...form.getInputProps("name")}
                         />
-                        <Button mt={'xs'} loading={isProcessing} loaderProps={{type: 'dots'}} type='submit' disabled={addDone}>Add</Button>
+                        <Button mt={'xs'} loading={isProcessing} loaderProps={{type: 'dots'}} type='submit' disabled={isProcessing}>Add</Button>
                     </form>
 
                     {error && (
@@ -145,11 +145,11 @@ export default function AdminManageSellers() {
                         <br/><br/>
                         <></>
                         <Group gap={'xs'}>
-                            Password <Text fw={700}>{DEFAULT_SELLER_PASSWORD}</Text>
+                            Password for the first signin: <Text fw={700}>{DEFAULT_SELLER_PASSWORD}</Text>
                         </Group>
                         <br/>
-                        Don't worry about hard code password, because seller need to reset password using
-                        the link sent to their mail on the first sign-in
+                        Don't worry about hard code password because seller always need to reset password using
+                        the link sent to their mail-box on the first sign-in
                     </Alert>
                 </Modal>
             }

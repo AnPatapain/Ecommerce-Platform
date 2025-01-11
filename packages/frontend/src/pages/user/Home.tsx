@@ -8,7 +8,7 @@ import {toast} from "react-toastify";
 export const Home = () => {
     const [shopItems, setShopItems] = useState<ShopItem[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const {token, currentUser, reloadCurrentUser} = useAuth();
+    const {token, currentUser, reloadAuthContext} = useAuth();
     const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
@@ -44,7 +44,7 @@ export const Home = () => {
                 shopItemsToAdd: [shopItem.id],
                 shopItemsToRemove: [],
             }, token);
-            await reloadCurrentUser();
+            await reloadAuthContext();
             setIsProcessing(false);
             toast.success('Product is added to cart successfully.');
         } catch (error: any) {

@@ -3,13 +3,19 @@ import {createContext, useContext, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {apiClient} from "./api-client.ts";
 import {APISuccessResponse, MailVerificationResponse, SignupSuccessResponse} from "@app/shared-models/src/api.type.ts";
+import {ShopItem} from "@app/shared-models/src/shopItem.model.ts";
+import {Order} from "@app/shared-models/src/order.model.ts";
+import {OrderedShopItem} from "@app/shared-models/src/orderedShopItem.model.ts";
 
 const API_KEY_LOCALSTORAGE_KEY = 'x-api-key';
+
+export type HistoricalOrderedShopItem = ShopItem & {valid: boolean};
 
 interface AuthContextType {
     finishLoadingAuthContext: boolean;
     currentUser: User | null;
-    reloadCurrentUser: () => Promise<void>;
+    historicalOrderedShopItems: HistoricalOrderedShopItem[];
+    reloadAuthContext: () => Promise<void>;
     token: string | null;
     signup: (email: string, name: string, password: string) => Promise<SignupSuccessResponse>;
     signin: (email: string, password: string) => Promise<User>;
@@ -25,6 +31,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({children}: { children: any }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem(API_KEY_LOCALSTORAGE_KEY));
+    const [historicalOrderedShopItems, setHistoricalOrderedShopItems] = useState<HistoricalOrderedShopItem[]>([]);
     const [finishLoadingAuthContext, setFinishLoadingAuthContext ] = useState<boolean>(false);
     const navigate = useNavigate();
 
@@ -34,6 +41,23 @@ export const AuthProvider = ({children}: { children: any }) => {
                 try {
                     setFinishLoadingAuthContext(false);
                     const user = await apiClient.user.getCurrent(token);
+                    console.log('finish fetch user');
+                    const myOrders = await apiClient.order.getMyOrders(token);
+                    console.log('finish fetch orders of user');
+                    const historicalOrderedShopItems_: HistoricalOrderedShopItem[] = await Promise.all(
+                        myOrders.flatMap((order: Order) => {
+                            return order.orderedShopItems.map(async (orderedShopItem: OrderedShopItem) => {
+                                const shopItemId = orderedShopItem.shopItemId;
+                                const shopItem: ShopItem = await apiClient.shopItem.getOneById(shopItemId, token)
+                                return {
+                                    ...shopItem,
+                                    valid: order.valid
+                                };
+                            });
+                        })
+                    );
+                    console.log('finish flat out shopItem from user orders');
+                    setHistoricalOrderedShopItems(historicalOrderedShopItems_);
                     setCurrentUser(user);
                     setFinishLoadingAuthContext(true);
                 } catch (error) {
@@ -48,12 +72,26 @@ export const AuthProvider = ({children}: { children: any }) => {
         fetchCurrentUser();
     }, [token]);
 
-    const reloadCurrentUser = async () => {
+    const reloadAuthContext = async () => {
         if (token) {
             try {
                 setFinishLoadingAuthContext(false);
                 const user = await apiClient.user.getCurrent(token);
+                const myOrders = await apiClient.order.getMyOrders(token);
+                const historicalOrderedShopItems_: HistoricalOrderedShopItem[] = await Promise.all(
+                    myOrders.flatMap((order: Order) => {
+                        return order.orderedShopItems.map(async (orderedShopItem: OrderedShopItem) => {
+                            const shopItemId = orderedShopItem.shopItemId;
+                            const shopItem: ShopItem = await apiClient.shopItem.getOneById(shopItemId, token)
+                            return {
+                                ...shopItem,
+                                valid: order.valid
+                            };
+                        });
+                    })
+                );
                 setCurrentUser(user);
+                setHistoricalOrderedShopItems(historicalOrderedShopItems_);
                 setFinishLoadingAuthContext(true);
             } catch (error) {
                 console.error('AuthContext::', error);
@@ -143,7 +181,8 @@ export const AuthProvider = ({children}: { children: any }) => {
         value={{
             finishLoadingAuthContext: finishLoadingAuthContext,
             currentUser,
-            reloadCurrentUser,
+            reloadAuthContext,
+            historicalOrderedShopItems,
             token,
             signup,
             signin,

@@ -32,6 +32,8 @@ export const BASE_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
     'user:current.write',
     'token:current.read',
     'token:current.write',
+    'order:current.read',
+    'order:current.write',
 ]);
 
 export const USER_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
@@ -44,6 +46,7 @@ export const USER_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
 
 export const SELLER_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
     ...USER_SCOPES,
+    'user.read',
     'order.read',
     'order.write',
 ]);

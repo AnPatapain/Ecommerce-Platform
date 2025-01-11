@@ -24,6 +24,7 @@ import AdminManageShopItems from "./pages/admin/AdminManageShopItems.tsx";
 import AdminManageSellers from "./pages/admin/AdminManageSellers.tsx";
 import SellerPagesTemplate from "./pages/seller/SellerPagesTemplate.tsx";
 import SellerManageOrders from "./pages/seller/SellerManageOrders.tsx";
+import MyOrders from "./pages/user/MyOrders.tsx";
 
 
 const router = createBrowserRouter([
@@ -77,6 +78,10 @@ const router = createBrowserRouter([
                     {
                         path: "my-cart",
                         element: <MyCart/>
+                    },
+                    {
+                        path: "my-orders",
+                        element: <MyOrders/>
                     }
                 ],
             },
