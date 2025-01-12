@@ -102,7 +102,7 @@ export class ShopItemController extends Controller{
      * @param errNotSupportedFileType
      */
     @Post('upload-image')
-    @Security('token', ['shopItem.write'])
+    // @Security('token', ['shopItem.write'])
     @SuccessResponse('201', 'Created')
     @Tags('Shop Item/Admin')
     public async uploadImage(
