@@ -150,32 +150,6 @@ export class ShopItemController extends Controller{
         return this.shopItemRepository.createOne(shopItemData);
     }
 
-    /**
-     * Delete a specific shop item by ID.
-     * @param id - The ID of the shop item.
-     * @param errShopItemNotFound - Response if the shop item is not found.
-     * @returns The deleted shop item.
-     */
-    @Delete('{id}')
-    @Security('token', ['shopItem.write'])
-    @SuccessResponse('200', 'OK')
-    @Tags('Shop Item/Admin')
-    public async deleteShopItem(
-        @Path() id: number,
-        @Res() errShopItemNotFound: TsoaResponse<404, APIErrorType>
-    ){
-        const shopItem = await this.shopItemRepository.findById(id);
-        if (!shopItem) {
-            throw errShopItemNotFound(404, {
-                code: 'ERR_SHOP_ITEM_NOT_FOUND'
-            });
-        }
-
-        await this.minioClient.delete(shopItem.image);
-        return this.shopItemRepository.deleteOne(id);
-    }
-
-
 
     private handleFile(request: express.Request): Promise<void> {
         const multerSingle = multer().single("file");

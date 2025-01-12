@@ -74,20 +74,11 @@ export class ShopItemRepository{
         });
     }
 
-    public async deleteOne(id: number){
-        return PRISMA_CLIENT.shopItem.delete({
-            where: {
-                id: id
-            },
-
-        });
-    }
-
     public async deleteMany() {
-        return PRISMA_CLIENT.user.deleteMany({});
+        return PRISMA_CLIENT.shopItem.deleteMany({});
     }
 
     public async count(): Promise<number> {
-        return PRISMA_CLIENT.user.count();
+        return PRISMA_CLIENT.shopItem.count();
     }
 }
