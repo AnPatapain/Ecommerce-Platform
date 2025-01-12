@@ -38,6 +38,9 @@ importers:
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
+      '@types/multer':
+        specifier: 1.4.12
+        version: 1.4.12
       '@types/node':
         specifier: ^22.5.4
         version: 22.10.5
@@ -83,10 +86,6 @@ importers:
       typescript:
         specifier: ^5.2.2
         version: 5.7.3
-    devDependencies:
-      '@types/multer':
-        specifier: 1.4.12
-        version: 1.4.12
 
   packages/frontend:
     dependencies:
