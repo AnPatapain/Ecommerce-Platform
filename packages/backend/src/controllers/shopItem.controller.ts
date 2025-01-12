@@ -10,19 +10,24 @@ import {
     Security,
     Body,
     SuccessResponse,
-    Post, Delete, Tags
+    Post, Delete, Tags,
+    Request,
+    Response
 } from "tsoa";
 
 import {APIErrorType} from "@app/shared-models/src/error.type";
-import {type ShopItemCreationRequest,type ShopItemUpdateRequest} from "@app/shared-models/src/api.type";
+import {type BufferedFile, type ShopItemCreationRequest, type ShopItemUpdateRequest} from "@app/shared-models/src/api.type";
 import {ShopItemRepository} from "../repositories/shopItem.repository";
-
+import { MinioClient } from "../services/minio.service";
+import express, {response} from "express";
+import multer from "multer";
 
 
 
 @Route('/api/shop-item')
 export class ShopItemController extends Controller{
     private shopItemRepository: ShopItemRepository = ShopItemRepository.getInstance();
+    private minioClient: MinioClient = MinioClient.getInstance();
 
     /**
      * Retrieve all shop items.
@@ -60,6 +65,7 @@ export class ShopItemController extends Controller{
         return shopItem;
     }
 
+
     ////////////////
     // Admin routes
 
@@ -89,6 +95,31 @@ export class ShopItemController extends Controller{
         return this.shopItemRepository.updateOne(id, shopItemData);
     }
 
+
+    /**
+     * Upload an image for a shop item.
+     * @param req
+     * @param errNotSupportedFileType
+     */
+    @Post('upload-image')
+    @Security('token', ['shopItem.write'])
+    @SuccessResponse('201', 'Created')
+    @Tags('Shop Item/Admin')
+    public async uploadImage(
+        @Request() req: express.Request,
+        @Res() errNotSupportedFileType: TsoaResponse<400, APIErrorType>
+    ){
+        await this.handleFile(req);
+        const image = req.file as BufferedFile;
+        await this.minioClient.initializeBucket();
+
+        if (!(image.mimetype.includes('jpeg') || image.mimetype.includes('png'))) {
+            throw errNotSupportedFileType(400, {
+                code: 'ERR_NOT_SUPPORTED_FILE_TYPE',
+            });
+        }
+        return this.minioClient.upload(image);
+    }
 
     /**
      * Create a new shop item.
@@ -133,8 +164,24 @@ export class ShopItemController extends Controller{
                 code: 'ERR_SHOP_ITEM_NOT_FOUND'
             });
         }
+
+        await this.minioClient.delete(shopItem.image);
         return this.shopItemRepository.deleteOne(id);
     }
 
+
+
+    private handleFile(request: express.Request): Promise<void> {
+        const multerSingle = multer().single("file");
+        return new Promise((resolve, reject) => {
+            multerSingle(request, null as any, async (error) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
 
 }

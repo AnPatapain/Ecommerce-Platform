@@ -6,8 +6,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm"
   },
-  "dependencies": {
-  },
   "devDependencies": {
+    "@types/node": "^22.5.4"
   }
 }
