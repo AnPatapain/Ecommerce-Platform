@@ -44,7 +44,7 @@ function getLinksForNavBar(user: User | null): NavLink[] {
 
 export default function HorizontalNav() {
     const [opened, {toggle}] = useDisclosure(false);
-    const {currentUser, signout, historicalOrderedShopItems} = useAuth();
+    const {currentUser, signout, historicalOrders} = useAuth();
 
     const links: NavLink[] = getLinksForNavBar(currentUser);
     const navigate = useNavigate();
@@ -120,8 +120,8 @@ export default function HorizontalNav() {
         }
 
         if (link.label === 'My Orders') {
-            if(historicalOrderedShopItems.length > 0) {
-                const numShopItemNotValidated = historicalOrderedShopItems.filter(s => !s.valid).length;
+            const numShopItemNotValidated = historicalOrders.filter(s => !s.valid).length;
+            if(numShopItemNotValidated > 0) {
                 return <a
                     key={link.label}
                     href={link.link}

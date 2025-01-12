@@ -1,57 +1,64 @@
-import {Badge, Container, Flex, Group, Image, Table, Text} from "@mantine/core";
+import {Badge, Container, Flex, Group, ScrollArea, Table} from "@mantine/core";
 import {useAuth} from "../../auth.context.tsx";
+import {ShopItem} from "@app/shared-models/src/shopItem.model.ts";
+
 
 export default function MyOrders(){
-    const {historicalOrderedShopItems} = useAuth();
+    const {historicalOrders} = useAuth();
 
-    const totalPrice = historicalOrderedShopItems.reduce((total, item) => total + item.price, 0);
-
+    const totalSpent = historicalOrders.reduce((total, order) => {
+        return total + order.totalPrice;
+    }, 0);
     return (
         <Container size={"md"}>
             <Flex direction={"column"} pt={"xl"} mx={"auto"}>
-                <Flex direction={"column"} justify="space-between" align="flex-start" mb={"xs"}>
-                    <h1>My orders</h1>
-                    <Group>
-                        <Text>Total price: ${totalPrice}</Text>
-                    </Group>
-                </Flex>
-                <Table highlightOnHover withTableBorder withColumnBorders>
-                    <Table.Thead>
-                        <Table.Tr>
-                            <Table.Th>Image</Table.Th>
-                            <Table.Th>Name</Table.Th>
-                            <Table.Th>Description</Table.Th>
-                            <Table.Th>Quantity</Table.Th>
-                            <Table.Th>Price</Table.Th>
-                            <Table.Th>State</Table.Th>
-                        </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>{
-                        historicalOrderedShopItems.map((shopItem, index) => (
-                            <Table.Tr key={`${shopItem.id}-${index}`}>
-                                <Table.Td>
-                                    <Image
-                                        src={shopItem.image}
-                                        alt={shopItem.name}
-                                        width={100}
-                                        height={50}
-                                        radius="sm"
-                                    />
-                                </Table.Td>
-                                <Table.Td>{shopItem.name}</Table.Td>
-                                <Table.Td>{shopItem.description}</Table.Td>
-                                <Table.Td>1</Table.Td>
-                                <Table.Td>{shopItem.price}</Table.Td>
-                                <Table.Td>
-                                    { shopItem.valid ?
-                                        <Badge color="green">validated</Badge> :
-                                        <Badge color="gray">wait for validation</Badge>
-                                    }
-                                </Table.Td>
+                <h1>My historical orders</h1>
+                <Group gap={'xs'} mb={'md'}>
+                    <strong>Total Spent:</strong>
+                    <Badge size="lg" radius="lg">
+                        ${totalSpent}
+                    </Badge>
+                </Group>
+                <ScrollArea h={'70vh'}>
+                    <Table highlightOnHover withTableBorder withColumnBorders>
+                        <Table.Thead>
+                            <Table.Tr>
+                                <Table.Th>Order ID</Table.Th>
+                                <Table.Th>User Email</Table.Th>
+                                <Table.Th>Total Price</Table.Th>
+                                <Table.Th>State</Table.Th>
+                                <Table.Th>Items</Table.Th>
                             </Table.Tr>
-                        ))
-                    }</Table.Tbody>
-                </Table>
+                        </Table.Thead>
+                        <Table.Tbody>
+                            {historicalOrders
+                                .sort((a, b) => Number(a.valid) - Number(b.valid))
+                                .map((order) => (
+                                    <Table.Tr key={order.orderId}>
+                                        <Table.Td>{order.orderId}</Table.Td>
+                                        <Table.Td>{order.userEmail}</Table.Td>
+                                        <Table.Td>${order.totalPrice}</Table.Td>
+                                        <Table.Td>
+                                            {order.valid ? (
+                                                <Badge color="green">Validated</Badge>
+                                            ) : (
+                                                <Badge color="gray">Wait for validation</Badge>
+                                            )}
+                                        </Table.Td>
+                                        <Table.Td>
+                                            <ul>
+                                                {order.items.map((item: ShopItem) => (
+                                                    <li key={`${order.orderId}-${item.id}`}>
+                                                        {item.name} (${item.price})
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </Table.Td>
+                                    </Table.Tr>
+                                ))}
+                        </Table.Tbody>
+                    </Table>
+                </ScrollArea>
             </Flex>
         </Container>
     );

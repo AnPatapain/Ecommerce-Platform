@@ -72,6 +72,7 @@ export class UserController extends Controller {
 
     @Get('{userId}')
     @Security('token', ['user.read'])
+    @Tags('User/Admin')
     public async getUserById(userId: number): Promise<User | null> {
         return await this.userRepository.findOneById(userId);
     }

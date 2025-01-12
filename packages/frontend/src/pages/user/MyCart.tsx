@@ -1,4 +1,4 @@
-import {Button, Container, Flex, Group, Image, Table, Text} from "@mantine/core";
+import {Button, Container, Flex, Group, Image, ScrollArea, Table, Text} from "@mantine/core";
 import {useAuth} from "../../auth.context.tsx";
 import {useEffect, useState} from "react";
 import {ShopItem} from "@app/shared-models/src/shopItem.model.ts";
@@ -85,49 +85,49 @@ export default function MyCart() {
                         >Order</Button>
                     </Group>
                 </Flex>
-                <Table highlightOnHover withTableBorder withColumnBorders>
-                    <Table.Thead>
-                        <Table.Tr>
-                            <Table.Th>Image</Table.Th>
-                            <Table.Th>Name</Table.Th>
-                            <Table.Th>Description</Table.Th>
-                            <Table.Th>Quantity</Table.Th>
-                            <Table.Th>Price</Table.Th>
-                            <Table.Th>Action</Table.Th>
-                        </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>{
-                        shopItems.map((shopItem) => (
-                            <Table.Tr key={shopItem.id}>
-                                <Table.Td>
-                                    <Image
-                                        src={shopItem.image}
-                                        alt={shopItem.name}
-                                        width={100}
-                                        height={50}
-                                        radius="sm"
-                                    />
-                                </Table.Td>
-                                <Table.Td>{shopItem.name}</Table.Td>
-                                <Table.Td>{shopItem.description}</Table.Td>
-                                <Table.Td>1</Table.Td>
-                                <Table.Td>{shopItem.price}</Table.Td>
-                                <Table.Td>
-                                    <Group>
-                                        <Button
-                                            disabled={isProcessingDelete}
-                                            loading={isProcessingDelete}
-                                            loaderProps={{type: 'dots'}}
-                                            color={'red'}
-                                            variant={'outline'}
-                                            onClick={() => {removeShopItem(shopItem.id)}}
-                                        >Delete</Button>
-                                    </Group>
-                                </Table.Td>
+                <ScrollArea h={'70vh'}>
+                    <Table highlightOnHover withTableBorder withColumnBorders>
+                        <Table.Thead>
+                            <Table.Tr>
+                                <Table.Th>Image</Table.Th>
+                                <Table.Th>Name</Table.Th>
+                                <Table.Th>Description</Table.Th>
+                                <Table.Th>Price</Table.Th>
+                                <Table.Th>Action</Table.Th>
                             </Table.Tr>
-                        ))
-                    }</Table.Tbody>
-                </Table>
+                        </Table.Thead>
+                        <Table.Tbody>{
+                            shopItems.map((shopItem) => (
+                                <Table.Tr key={shopItem.id}>
+                                    <Table.Td>
+                                        <Image
+                                            src={shopItem.image}
+                                            alt={shopItem.name}
+                                            width={100}
+                                            height={50}
+                                            radius="sm"
+                                        />
+                                    </Table.Td>
+                                    <Table.Td>{shopItem.name}</Table.Td>
+                                    <Table.Td>{shopItem.description}</Table.Td>
+                                    <Table.Td>{shopItem.price}</Table.Td>
+                                    <Table.Td>
+                                        <Group>
+                                            <Button
+                                                disabled={isProcessingDelete}
+                                                loading={isProcessingDelete}
+                                                loaderProps={{type: 'dots'}}
+                                                color={'red'}
+                                                variant={'outline'}
+                                                onClick={() => {removeShopItem(shopItem.id)}}
+                                            >Delete</Button>
+                                        </Group>
+                                    </Table.Td>
+                                </Table.Tr>
+                            ))
+                        }</Table.Tbody>
+                    </Table>
+                </ScrollArea>
             </Flex>
             {error && toast.error(error)}
         </Container>

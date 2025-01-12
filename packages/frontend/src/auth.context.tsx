@@ -3,18 +3,16 @@ import {createContext, useContext, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {apiClient} from "./api-client.ts";
 import {APISuccessResponse, MailVerificationResponse, SignupSuccessResponse} from "@app/shared-models/src/api.type.ts";
-import {ShopItem} from "@app/shared-models/src/shopItem.model.ts";
 import {Order} from "@app/shared-models/src/order.model.ts";
 import {OrderedShopItem} from "@app/shared-models/src/orderedShopItem.model.ts";
+import {DisplayOrder} from "./pages/seller/SellerManageOrders.tsx";
 
 const API_KEY_LOCALSTORAGE_KEY = 'x-api-key';
-
-export type HistoricalOrderedShopItem = ShopItem & {valid: boolean};
 
 interface AuthContextType {
     finishLoadingAuthContext: boolean;
     currentUser: User | null;
-    historicalOrderedShopItems: HistoricalOrderedShopItem[];
+    historicalOrders: DisplayOrder[];
     reloadAuthContext: () => Promise<void>;
     token: string | null;
     signup: (email: string, name: string, password: string) => Promise<SignupSuccessResponse>;
@@ -31,77 +29,75 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({children}: { children: any }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem(API_KEY_LOCALSTORAGE_KEY));
-    const [historicalOrderedShopItems, setHistoricalOrderedShopItems] = useState<HistoricalOrderedShopItem[]>([]);
+    const [historicalOrderedShopItems, setHistoricalOrderedShopItems] = useState<DisplayOrder[]>([]);
     const [finishLoadingAuthContext, setFinishLoadingAuthContext ] = useState<boolean>(false);
     const navigate = useNavigate();
 
+    // Helper function to fetch user and orders
+    const fetchUserAndOrders = async (authToken: string) => {
+        try {
+            const user = await apiClient.user.getCurrent(authToken);
+            const myOrders = await apiClient.order.getMyOrders(authToken);
+
+            const groupedOrders: DisplayOrder[] = await Promise.all(
+                myOrders.map(async (order: Order) => {
+                    const user = await apiClient.user.getCurrent(authToken);
+                    const shopItems = await Promise.all(
+                        order.orderedShopItems.map(async (orderedShopItem: OrderedShopItem) => {
+                            return await apiClient.shopItem.getOneById(
+                                orderedShopItem.shopItemId,
+                                authToken
+                            );
+                        })
+                    );
+                    return {
+                        orderId: order.id,
+                        userEmail: user?.email || "unknown",
+                        valid: order.valid,
+                        totalPrice: shopItems.reduce((total, item) => total + item.price, 0),
+                        items: shopItems,
+                    };
+                })
+            );
+
+            setCurrentUser(user);
+            setHistoricalOrderedShopItems(groupedOrders);
+        } catch (error) {
+            console.error('AuthContext::', error);
+            throw error;
+        }
+    };
+
     useEffect(() => {
-        const fetchCurrentUser = async () => {
+        const initializeAuthContext = async () => {
             if (token) {
                 try {
                     setFinishLoadingAuthContext(false);
-                    const user = await apiClient.user.getCurrent(token);
-                    console.log('finish fetch user');
-                    const myOrders = await apiClient.order.getMyOrders(token);
-                    console.log('finish fetch orders of user');
-                    const historicalOrderedShopItems_: HistoricalOrderedShopItem[] = await Promise.all(
-                        myOrders.flatMap((order: Order) => {
-                            return order.orderedShopItems.map(async (orderedShopItem: OrderedShopItem) => {
-                                const shopItemId = orderedShopItem.shopItemId;
-                                const shopItem: ShopItem = await apiClient.shopItem.getOneById(shopItemId, token)
-                                return {
-                                    ...shopItem,
-                                    valid: order.valid
-                                };
-                            });
-                        })
-                    );
-                    console.log('finish flat out shopItem from user orders');
-                    setHistoricalOrderedShopItems(historicalOrderedShopItems_);
-                    setCurrentUser(user);
-                    setFinishLoadingAuthContext(true);
+                    await fetchUserAndOrders(token);
                 } catch (error) {
-                    console.error('AuthContext::', error);
-                    setFinishLoadingAuthContext(true);
                     signout();
+                } finally {
+                    setFinishLoadingAuthContext(true);
                 }
             } else {
                 setFinishLoadingAuthContext(true);
             }
-        }
-        fetchCurrentUser();
+        };
+        initializeAuthContext();
     }, [token]);
 
     const reloadAuthContext = async () => {
         if (token) {
             try {
                 setFinishLoadingAuthContext(false);
-                const user = await apiClient.user.getCurrent(token);
-                const myOrders = await apiClient.order.getMyOrders(token);
-                const historicalOrderedShopItems_: HistoricalOrderedShopItem[] = await Promise.all(
-                    myOrders.flatMap((order: Order) => {
-                        return order.orderedShopItems.map(async (orderedShopItem: OrderedShopItem) => {
-                            const shopItemId = orderedShopItem.shopItemId;
-                            const shopItem: ShopItem = await apiClient.shopItem.getOneById(shopItemId, token)
-                            return {
-                                ...shopItem,
-                                valid: order.valid
-                            };
-                        });
-                    })
-                );
-                setCurrentUser(user);
-                setHistoricalOrderedShopItems(historicalOrderedShopItems_);
-                setFinishLoadingAuthContext(true);
+                await fetchUserAndOrders(token);
             } catch (error) {
-                console.error('AuthContext::', error);
-                setFinishLoadingAuthContext(true);
                 signout();
+            } finally {
+                setFinishLoadingAuthContext(true);
             }
-        } else {
-            setFinishLoadingAuthContext(true);
         }
-    }
+    };
 
     const signup = async (name: string, email: string, password: string): Promise<SignupSuccessResponse> => {
         try {
@@ -142,10 +138,8 @@ export const AuthProvider = ({children}: { children: any }) => {
 
     const verifyAccountEmail = async (verifyToken: string): Promise<void> => {
         try {
-            console.log('Verify account');
             const verifyResponse = await apiClient.auth.verifyAccount(verifyToken);
             const apiAccessToken = verifyResponse.apiAccessToken;
-            console.log('apiAccessToken', apiAccessToken);
             localStorage.setItem(API_KEY_LOCALSTORAGE_KEY, apiAccessToken);
             setToken(apiAccessToken);
 
@@ -182,7 +176,7 @@ export const AuthProvider = ({children}: { children: any }) => {
             finishLoadingAuthContext: finishLoadingAuthContext,
             currentUser,
             reloadAuthContext,
-            historicalOrderedShopItems,
+            historicalOrders: historicalOrderedShopItems,
             token,
             signup,
             signin,

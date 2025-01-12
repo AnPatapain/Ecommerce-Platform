@@ -8,7 +8,12 @@ import {
     ResetPasswordRequest,
     APISuccessResponse,
     SignupSuccessResponse,
-    SellerCreationRequest, SellerCreationResponse, CartUpdateRequest, OrderCreationRequest
+    SellerCreationRequest,
+    SellerCreationResponse,
+    CartUpdateRequest,
+    OrderCreationRequest,
+    ShopItemCreationRequest,
+    ShopItemUpdateRequest
 } from "@app/shared-models/src/api.type.ts";
 import {CONFIG} from "./frontend-config.ts";
 import {Order} from "@app/shared-models/src/order.model.ts";
@@ -36,7 +41,14 @@ export const apiClient = {
     },
     shopItem: {
         getAll: () => sendRequest('GET', 'api/shop-item'),
-        getOneById: (id: number, token: string): Promise<ShopItem> => sendRequest('GET', `api/shop-item/${id}`, undefined, token),
+        getOneById: (id: number, token: string): Promise<ShopItem> =>
+            sendRequest('GET', `api/shop-item/${id}`, undefined, token),
+        createOne: (data: ShopItemCreationRequest, token: string) =>
+            sendRequest('POST', 'api/shop-item', data, token),
+        updateOne: (shopItemId: number, data: ShopItemUpdateRequest, token: string) =>
+            sendRequest('PUT', `api/shop-item/${shopItemId}`, data, token),
+        deleteOne: (shopItemId: number, token: string) =>
+            sendRequest('DELETE', `api/shop-item/${shopItemId}`, undefined, token),
     },
     cart: {
         addShopItemToCart: (data: CartUpdateRequest, token: string) =>
@@ -46,11 +58,13 @@ export const apiClient = {
     },
     order: {
         createOrder: (data: OrderCreationRequest, token: string): Promise<Order> =>
-            sendRequest('POST', 'api/order', data, token),
+            sendRequest('POST', 'api/order/me', data, token),
         getMyOrders: (token: string): Promise<Order[]> =>
             sendRequest('GET', 'api/order/me', undefined, token),
         getAllOrders: (token: string): Promise<Order[]> =>
             sendRequest('GET', 'api/order', undefined, token),
+        validateOrder: (orderId: number, token: string): Promise<APISuccessResponse> =>
+            sendRequest('PUT', `api/order/${orderId}`, undefined, token),
     },
     admin: {
         getAllSellers: (token: string): Promise<User[]> =>

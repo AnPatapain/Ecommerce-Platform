@@ -4,7 +4,7 @@ import { CiLogout } from "react-icons/ci";
 import { AiOutlineProduct } from "react-icons/ai";
 import { LuShoppingBag } from "react-icons/lu";
 import { FiUsers } from "react-icons/fi";
-import { Group } from '@mantine/core';
+import {Badge, Group} from '@mantine/core';
 import classes from './VerticalNav.module.css';
 import {useLocation, useNavigate} from "react-router-dom";
 import {useAuth} from "../auth.context.tsx";
@@ -64,8 +64,10 @@ export default function VerticalNav() {
     return (
         <nav className={classes.navbar}>
             <div className={classes.navbarMain}>
-                <Group className={classes.header} justify="space-between">
+                <Group className={classes.header}>
                     <h3>ECM</h3>
+                    <Badge color={'red'}>{currentUser?.role}</Badge>
+                    <h5>{currentUser?.email}</h5>
                 </Group>
                 {links}
             </div>
@@ -76,7 +78,7 @@ export default function VerticalNav() {
                     signout();
                     toast.success('Logout successfully!')
                 }}>
-                    <CiLogout className={classes.linkIcon} />
+                    <CiLogout className={classes.linkIcon}/>
                     <span>Logout</span>
                 </a>
             </div>

@@ -16,6 +16,7 @@ const DEFAULT_SELLER_PASSWORD = 'azerty'
 export default function AdminManageSellers() {
     const [sellers, setSellers] = useState<User[]>([]);
     const [isAdd, setIsAdd] = useState<boolean>(false);
+    const [toBeDeleteUser, setToBeDeleteUser] = useState<User | null>(null);
     const {token} = useAuth();
     const [error, setError] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -62,6 +63,7 @@ export default function AdminManageSellers() {
             await apiClient.admin.deleteSeller(id, token as string);
             const updatedSellers = await apiClient.admin.getAllSellers(token as string);
             setSellers(updatedSellers);
+            setToBeDeleteUser(null);
             toast.success('Seller is deleted successfully!');
         } catch (error: any) {
             setError(error.toString());
@@ -101,7 +103,8 @@ export default function AdminManageSellers() {
                                         color={'red'}
                                         variant={'outline'}
                                         onClick={() => {
-                                            deleteSeller(seller.id);
+                                            setToBeDeleteUser(seller);
+                                            // deleteSeller(seller.id);
                                         }}
                                     >
                                         Delete
@@ -113,11 +116,46 @@ export default function AdminManageSellers() {
                 }</Table.Tbody>
             </Table>
             {
+                toBeDeleteUser &&
+                <Modal
+                    size={'md'}
+                    opened={!!toBeDeleteUser}
+                    onClose={() => {setToBeDeleteUser(null)}}
+                    closeOnClickOutside={true}
+                    title={<h2>Delete seller</h2>}
+                >
+                    <Text>
+                        This action will delete the seller on platform, they can not validate the orders anymore. Are you sure ?
+                    </Text>
+                    <Group mt={'xl'}>
+                        <Button
+                            color={'red'}
+                            variant={'outline'}
+                            onClick={() => {
+                                deleteSeller((toBeDeleteUser as User).id);
+                            }}
+                        >
+                            Confirm
+                        </Button>
+                        <Button
+                            color={'gray'}
+                            variant={'outline'}
+                            onClick={() => {
+                                setToBeDeleteUser(null);
+                            }}
+                        >
+                            Close
+                        </Button>
+                    </Group>
+                </Modal>
+            }
+            {
                 isAdd &&
                 <Modal
                     size={'md'}
                     opened={isAdd}
                     onClose={() => {setIsAdd(false)}}
+                    closeOnClickOutside={false}
                     title= {<h2>Add seller</h2>}
                 >
                     <form onSubmit={form.onSubmit(addSeller)}>

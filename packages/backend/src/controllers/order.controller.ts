@@ -118,53 +118,6 @@ export class OrderController extends Controller{
         return order;
     }
 
-    // @Post('')
-    // @Security('token', ['order:current.write'])
-    // @SuccessResponse('201', 'Created')
-    // public async createOrder(
-    //     @Request() req: express.Request,
-    //     @Body() orderData: OrderCreationRequest,
-    //     @Res() errShopItemNotFound: TsoaResponse<404, APIErrorType>,
-    //     @Res() errCartNotFound: TsoaResponse<404, APIErrorType>,
-    //     @Res() errShopItemInvalidStock: TsoaResponse<400, APIErrorType>,
-    // ){
-    //     const currentUser = getCurrentUser(req);
-    //     for(const shopItem of orderData.shopItems){
-    //         const shopItemFound = await this.shopItemRepository.findById(shopItem.id);
-    //         if (!shopItemFound) {
-    //             throw errShopItemNotFound(404, {
-    //                 code: 'ERR_SHOP_ITEM_NOT_FOUND'
-    //             });
-    //         }
-    //         if (shopItemFound.quantity < 0) {
-    //             throw errShopItemInvalidStock(400, {
-    //                 code: 'ERR_SHOP_ITEM_INVALID_STOCK'
-    //             });
-    //         }
-    //     }
-    //
-    //     const createdOrder = await this.orderRepository.createOne({
-    //         userId: currentUser.id,
-    //         shopItems: orderData.shopItems,
-    //     });
-    //
-    //     // Remove corresponding item in cart
-    //     const cartController = new CartController();
-    //     await cartController.updateCart(
-    //         req,
-    //         {
-    //             shopItemsToAdd: [],
-    //             shopItemsToRemove: [...orderData.shopItems.map(item => item.id)]
-    //         },
-    //         errCartNotFound,
-    //         errShopItemNotFound
-    //     )
-    //
-    //
-    //     return createdOrder
-    // }
-    //
-
     ////////////////
     // Seller routes
 

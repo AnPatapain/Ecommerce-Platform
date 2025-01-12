@@ -39,7 +39,7 @@ const ERROR_CODE_TO_STRING: Record<APIErrorCode, string> = {
     'ERR_USERNAME_PASSWORD_INVALID': 'Username or password is invalid',
     'ERR_SECURITY_CONTEXT_NOT_SET': 'Security context is not set',
     'ERR_SHOP_ITEM_NOT_FOUND': 'Shop item not found',
-    'ERR_SHOP_ITEM_INVALID_STOCK': 'Shop item stock is invalid',
+    'ERR_SHOP_ITEM_INVALID_STOCK': "One of items in order is out of stock. Please contact admin to increase item's quantity in stock",
     'ERR_SHOP_ITEM_ALREADY_EXISTS': 'Shop item already exists',
     'ERR_CART_EMPTY': 'Cart is empty',
     'ERR_CART_NOT_FOUND': 'Cart not found',
