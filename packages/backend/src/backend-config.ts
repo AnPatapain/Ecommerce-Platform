@@ -38,7 +38,7 @@ export const CONFIG: typeof env= {
     SMTP_PORT: '587',
     SMTP_USER: 'raphaelle.stamm95@ethereal.email',
     SMTP_PASSWORD: 'ujDd9JezSyrnNvxCZA',
-    MINIO_ENDPOINT: 'localhost',
+    MINIO_ENDPOINT: 'minio',
     MINIO_PORT: '9000',
     MINIO_ACCESS_KEY: 'miniouser',
     MINIO_SECRET_KEY: 'miniopassword',

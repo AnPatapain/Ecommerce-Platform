@@ -249,8 +249,7 @@ run_dev() {
 
   docker compose -f "${DOCKER_COMPOSE_DEV}" build --no-cache
   docker compose -f "${DOCKER_COMPOSE_DEV}" up --remove-orphans -d
-#  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f shop-monorepo-app-dev -f postgres-db -f shop-monorepo-nginx-dev # Service name not container name
-  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f shop-monorepo-app-dev -f minio
+  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f shop-monorepo-app-dev -f postgres-db -f shop-monorepo-nginx-dev # Service name not container name
   docker compose -f "${DOCKER_COMPOSE_DEV}" down -t 1
 }
 

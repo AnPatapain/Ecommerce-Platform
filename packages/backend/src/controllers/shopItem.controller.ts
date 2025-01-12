@@ -65,24 +65,7 @@ export class ShopItemController extends Controller{
         return shopItem;
     }
 
-    @Post('upload-image')
-    @NoSecurity()
-    @SuccessResponse('201', 'Created')
-    @Tags('Shop Item')
-    public async uploadImage(
-        @Request() req: express.Request,
-        @Res() errNotSupportedFileType: TsoaResponse<400, APIErrorType>
-    ){
-        await this.handleFile(req);
-        const image = req.file as BufferedFile;
-        // console.log(image);
-        if (!(image.mimetype.includes('jpeg') || image.mimetype.includes('png'))) {
-            throw errNotSupportedFileType(400, {
-                code: 'ERR_NOT_SUPPORTED_FILE_TYPE',
-            });
-        }
-        return this.minioClient.upload(image);
-    }
+
     ////////////////
     // Admin routes
 
@@ -112,6 +95,31 @@ export class ShopItemController extends Controller{
         return this.shopItemRepository.updateOne(id, shopItemData);
     }
 
+
+    /**
+     * Upload an image for a shop item.
+     * @param req
+     * @param errNotSupportedFileType
+     */
+    @Post('upload-image')
+    @Security('token', ['shopItem.write'])
+    @SuccessResponse('201', 'Created')
+    @Tags('Shop Item/Admin')
+    public async uploadImage(
+        @Request() req: express.Request,
+        @Res() errNotSupportedFileType: TsoaResponse<400, APIErrorType>
+    ){
+        await this.handleFile(req);
+        const image = req.file as BufferedFile;
+        await this.minioClient.initializeBucket();
+
+        if (!(image.mimetype.includes('jpeg') || image.mimetype.includes('png'))) {
+            throw errNotSupportedFileType(400, {
+                code: 'ERR_NOT_SUPPORTED_FILE_TYPE',
+            });
+        }
+        return this.minioClient.upload(image);
+    }
 
     /**
      * Create a new shop item.
@@ -156,6 +164,8 @@ export class ShopItemController extends Controller{
                 code: 'ERR_SHOP_ITEM_NOT_FOUND'
             });
         }
+
+        await this.minioClient.delete(shopItem.image);
         return this.shopItemRepository.deleteOne(id);
     }
 

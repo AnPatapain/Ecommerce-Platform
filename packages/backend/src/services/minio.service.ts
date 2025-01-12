@@ -1,25 +1,21 @@
 import { Client } from 'minio';
 import crypto from "node:crypto";
-import { Express } from 'express';
 import {BufferedFile} from "@app/shared-models/src/api.type";
 import {CONFIG} from "../backend-config";
 
 export class MinioClient {
     private static instance: MinioClient | null = null;
     private minioClient: Client;
-    private readonly bucketName = 'shop-bucket';
+    private readonly bucketName = CONFIG.MINIO_BUCKET_NAME as string;
 
     private constructor() {
         this.minioClient = new Client({
-            endPoint: 'localhost',
-            port: 9000,
-            useSSL: true,
-            accessKey: 'miniouser',
-            secretKey: 'miniopassword',
+            endPoint: CONFIG.MINIO_ENDPOINT as string,
+            port: parseInt(CONFIG.MINIO_PORT as string),
+            useSSL: false,
+            accessKey: CONFIG.MINIO_ACCESS_KEY,
+            secretKey: CONFIG.MINIO_SECRET_KEY,
         });
-
-        // Ensure the bucket exists on initialization
-        this.initializeBucket().catch(console.error);
     }
 
     public static getInstance(): MinioClient {
@@ -29,10 +25,26 @@ export class MinioClient {
         return MinioClient.instance;
     }
 
-    private async initializeBucket(): Promise<void> {
+    public async initializeBucket(): Promise<void> {
         const bucketExists = await this.minioClient.bucketExists(this.bucketName);
         if (!bucketExists) {
             await this.minioClient.makeBucket(this.bucketName);
+            const policy = {
+                Version: 'v1',
+                Statement: [
+                    {
+                        Effect: 'Allow',
+                        Principal: {
+                            AWS: ['*'],
+                        },
+                        Action: [
+                            's3:GetObject',
+                        ],
+                        Resource: [`arn:aws:s3:::${this.bucketName}/*`],
+                    },
+                ],
+            };
+            await this.minioClient.setBucketPolicy(this.bucketName, JSON.stringify(policy));
         }
     }
 
@@ -55,12 +67,19 @@ export class MinioClient {
         const fileName = hashedFileName + extension;
         await this.minioClient.putObject(this.bucketName, fileName, file.buffer,file.size,metaData);
         return {
-            url: `${CONFIG.MINIO_ENDPOINT}:${CONFIG.MINIO_PORT}/${this.bucketName}/${fileName}`,
+            url: `${CONFIG.PUBLIC_URL}/minio/${this.bucketName}/${fileName}`,
         }
     }
 
-    public async delete(fileName: string) {
-        return this.minioClient.removeObject(this.bucketName, fileName);
+    public async delete(fileUrl: string) {
+        const url = new URL(fileUrl);
+        const pathSegments = url.pathname.split('/');
+        const fileName = pathSegments[pathSegments.length - 1]; // Extract the last segment (filename)
+
+        if (pathSegments[pathSegments.length - 2] === this.bucketName) {
+            await this.minioClient.removeObject(this.bucketName, fileName);
+            return this.minioClient.removeObject(this.bucketName, fileName);
+        }
     }
 }
 

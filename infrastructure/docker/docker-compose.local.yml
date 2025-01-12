@@ -65,12 +65,11 @@ services:
     container_name: minio
     ports:
       - "9000:9000"
-      - "9001:9001"
     volumes:
       - "${MINIO}:/data:Z"
-    environment:
-      MINIO_ROOT_USER: miniouser
-      MINIO_ROOT_PASSWORD: miniopassword
+    env_file:
+      - "../../.env"
+    command: server /data
 
 
 volumes:

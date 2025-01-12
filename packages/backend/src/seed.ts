@@ -12,11 +12,11 @@ const RepositoryToBeSeeded = [
 export async function seed() {
     const oneOfReposIsEmpty = await checkOneOfReposIsEmpty();
     if (oneOfReposIsEmpty) {
-        await cleanEmptyRepos();
-        console.log('Seed user');
-        await seedUser();
-        console.log('Seed shopItems');
-        await seedShopItem();
+        // await cleanEmptyRepos();
+        // console.log('Seed user');
+        // await seedUser();
+        // console.log('Seed shopItems');
+        // await seedShopItem();
     }
 }
 

@@ -7,6 +7,8 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+infrastructure/minio
+
 node_modules
 packages/*/node_modules
 .pnpm-store
