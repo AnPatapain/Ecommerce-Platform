@@ -20,6 +20,8 @@ export ROOT_PROJECT
 
 # Location of TLS certificates
 TLS_DIR="${ROOT_PROJECT}/infrastructure/tls-dev"
+MINIO="${ROOT_PROJECT}/infrastructure/minio"
+export MINIO
 export TLS_DIR
 CERT_FILE="certificate.crt"
 KEY_FILE="private.key"
@@ -172,6 +174,11 @@ create_tls_certificates() {
   echo "TLS key and cert created successfully !"
 }
 
+check_minio() {
+  if [[ ! -d "$MINIO" ]]; then
+    mkdir -p "$MINIO"
+  fi
+}
 # Function to clean node_modules and dist
 clean_app() {
   if [[ "$1" = "--force-proceed" ]]; then
@@ -183,6 +190,7 @@ clean_app() {
   if [[ "$proceed" =~ ^[yY]$ ]]; then
     docker compose -f "${DOCKER_COMPOSE_DEV}" down -t 1 --volumes --remove-orphans
     docker compose -f "${DOCKER_COMPOSE_PROD}" down -t 1 --volumes --remove-orphans
+    sudo rm -rf /infrastructure/minio
     sudo rm -rf node_modules packages/*/node_modules packages/*/dist
     sudo rm -rf packages/backend/tsoa
     sudo rm pnpm-lock.yaml
@@ -223,6 +231,7 @@ run_prod() {
 # Function to start Docker Compose in development mode
 run_dev() {
   sync_env_files
+  check_minio
   # DOCKER_DEV_ENTRY_CMD will be used in DOCKER_COMPOSE_DEV file as an entry point to run the application in dev env
   export DOCKER_DEV_ENTRY_CMD="pnpm i && pnpm run dev"
   mkdir -p node_modules
@@ -240,7 +249,8 @@ run_dev() {
 
   docker compose -f "${DOCKER_COMPOSE_DEV}" build --no-cache
   docker compose -f "${DOCKER_COMPOSE_DEV}" up --remove-orphans -d
-  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f shop-monorepo-app-dev -f postgres-db -f shop-monorepo-nginx-dev # Service name not container name
+#  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f shop-monorepo-app-dev -f postgres-db -f shop-monorepo-nginx-dev # Service name not container name
+  docker compose -f "${DOCKER_COMPOSE_DEV}" logs -f shop-monorepo-app-dev -f minio
   docker compose -f "${DOCKER_COMPOSE_DEV}" down -t 1
 }
 

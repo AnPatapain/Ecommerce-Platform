@@ -10,19 +10,24 @@ import {
     Security,
     Body,
     SuccessResponse,
-    Post, Delete, Tags
+    Post, Delete, Tags,
+    Request,
+    Response
 } from "tsoa";
 
 import {APIErrorType} from "@app/shared-models/src/error.type";
-import {type ShopItemCreationRequest,type ShopItemUpdateRequest} from "@app/shared-models/src/api.type";
+import {type BufferedFile, type ShopItemCreationRequest, type ShopItemUpdateRequest} from "@app/shared-models/src/api.type";
 import {ShopItemRepository} from "../repositories/shopItem.repository";
-
+import { MinioClient } from "../services/minio.service";
+import express, {response} from "express";
+import multer from "multer";
 
 
 
 @Route('/api/shop-item')
 export class ShopItemController extends Controller{
     private shopItemRepository: ShopItemRepository = ShopItemRepository.getInstance();
+    private minioClient: MinioClient = MinioClient.getInstance();
 
     /**
      * Retrieve all shop items.
@@ -60,6 +65,24 @@ export class ShopItemController extends Controller{
         return shopItem;
     }
 
+    @Post('upload-image')
+    @NoSecurity()
+    @SuccessResponse('201', 'Created')
+    @Tags('Shop Item')
+    public async uploadImage(
+        @Request() req: express.Request,
+        @Res() errNotSupportedFileType: TsoaResponse<400, APIErrorType>
+    ){
+        await this.handleFile(req);
+        const image = req.file as BufferedFile;
+        // console.log(image);
+        if (!(image.mimetype.includes('jpeg') || image.mimetype.includes('png'))) {
+            throw errNotSupportedFileType(400, {
+                code: 'ERR_NOT_SUPPORTED_FILE_TYPE',
+            });
+        }
+        return this.minioClient.upload(image);
+    }
     ////////////////
     // Admin routes
 
@@ -136,5 +159,19 @@ export class ShopItemController extends Controller{
         return this.shopItemRepository.deleteOne(id);
     }
 
+
+
+    private handleFile(request: express.Request): Promise<void> {
+        const multerSingle = multer().single("file");
+        return new Promise((resolve, reject) => {
+            multerSingle(request, null as any, async (error) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
 
 }

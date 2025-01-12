@@ -29,6 +29,9 @@ services:
     user: "${DOCKER_UID}:${DOCKER_GID}"
     depends_on:
       - postgres-db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 
   postgres-db:
     image: postgres:17.2
@@ -42,6 +45,7 @@ services:
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
 
+
   shop-monorepo-nginx-dev:
     container_name: shop-monorepo-nginx-dev
     image: nginx:alpine
@@ -54,5 +58,21 @@ services:
     depends_on:
       - shop-monorepo-app-dev
 
+
+
+  minio:
+    image: quay.io/minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - "${MINIO}:/data:Z"
+    environment:
+      MINIO_ROOT_USER: miniouser
+      MINIO_ROOT_PASSWORD: miniopassword
+
+
 volumes:
   postgres_data_dev:
+
