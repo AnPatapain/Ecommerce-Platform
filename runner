@@ -92,7 +92,9 @@ list_prerequisite() {
   echo "   POSTGRES_USER=<username>"
   echo "   POSTGRES_PASSWORD=<password>"
   echo "   POSTGRES_DB=<database>"
-  echo "   DATABASE_URL=\"postgresql://<username>:<password>@postgres-db:5432/<database>?schema=public\""
+  echo "   DATABASE_URL=postgresql://user:qwerty@postgres-db:5432/fullstack_boilerplate_db?schema=public"
+  echo "   MINIO_ROOT_USER=miniouser"
+  echo "   MINIO_ROOT_PASSWORD=miniopassword"
   echo ""
   echo "   Note: postgres-db is the service name of postgres defined in docker-compose.local and docker-compose.prod"
 }
@@ -136,8 +138,9 @@ check_prerequisite() {
     echo "   POSTGRES_USER=<username>"
     echo "   POSTGRES_PASSWORD=<password>"
     echo "   POSTGRES_DB=<database>"
-    echo "   DATABASE_URL=\"postgresql://<username>:<password>@postgres-db:5432/<database>?schema=public\""
-    echo "   HMAC_SECRET=<your secret string>"
+    echo "   DATABASE_URL=postgresql://user:qwerty@postgres-db:5432/fullstack_boilerplate_db?schema=public"
+    echo "   MINIO_ROOT_USER=miniouser"
+    echo "   MINIO_ROOT_PASSWORD=miniopassword"
     echo ""
     echo "   Note: postgres-db is the service name of postgres defined in docker-compose.local and docker-compose.prod"
     echo ""
@@ -190,7 +193,7 @@ clean_app() {
   if [[ "$proceed" =~ ^[yY]$ ]]; then
     docker compose -f "${DOCKER_COMPOSE_DEV}" down -t 1 --volumes --remove-orphans
     docker compose -f "${DOCKER_COMPOSE_PROD}" down -t 1 --volumes --remove-orphans
-    sudo rm -rf /infrastructure/minio
+    sudo rm -rf ./infrastructure/minio
     sudo rm -rf node_modules packages/*/node_modules packages/*/dist
     sudo rm -rf packages/backend/tsoa
     sudo rm pnpm-lock.yaml

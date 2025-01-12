@@ -1,14 +1,17 @@
-import {Button, FileInput, Flex, Group, Image, Modal, Table, TextInput} from "@mantine/core";
+import {Button, FileInput, Flex, Group, Image, Modal, Table, Text, TextInput} from "@mantine/core";
 import {useEffect, useState} from "react";
 import {ShopItem} from "@app/shared-models/src/shopItem.model.ts";
 import {apiClient} from "../../api-client.ts";
 import {useForm} from "@mantine/form";
 import {toast} from "react-toastify";
+import {useAuth} from "../../auth.context.tsx";
 
 export default function AdminManageShopItems() {
+    const {token} = useAuth();
     const [shopItems, setShopItems] = useState<ShopItem[]>([]);
     const [isOpenModal, setIsOpenModal] = useState(false);
     const [editingItem, setEditingItem] = useState<ShopItem | null>(null);
+    const [toBeDeleteShopItem, setToBeDeleteShopItem] = useState<ShopItem | null>(null);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
     useEffect(() => {
@@ -48,63 +51,66 @@ export default function AdminManageShopItems() {
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch("API_ENDPOINT_FOR_IMAGE_UPLOAD", {
-            method: "POST",
-            body: formData,
-        });
+        const response = await apiClient.shopItem.uploadShopItemImage(formData, token as string);
 
-        if (!response.ok) {
-            throw new Error("Image upload failed");
-        }
-
-        const { url } = await response.json(); // Assuming the response contains the image URL
-        return url;
+        return response.url;
     };
 
     const saveShopItem = async (values: typeof form.values) => {
         try {
-            console.log('values::', values);
-            // setIsProcessing(true);
-            //
-            // // Upload the image if provided
-            // let imageUrl = editingItem?.image || "";
-            // if (values.image) {
-            //     imageUrl = await uploadImage(values.image);
-            // }
-            //
-            // const payload = {
-            //     name: values.name,
-            //     description: values.description,
-            //     quantity: Number(values.quantity),
-            //     price: Number(values.price),
-            //     image: imageUrl,
-            // };
-            //
-            // if (editingItem) {
-            //     // Edit existing item
-            //     await apiClient.shopItem.updateOne(editingItem.id, payload, "your-auth-token");
-            //     toast.success("Shop item updated successfully!");
-            // } else {
-            //     // Add new item
-            //     await apiClient.shopItem.createOne(payload, "your-auth-token");
-            //     toast.success("Shop item created successfully!");
-            // }
-            //
-            // // Refresh the list
-            // const updatedShopItems = await apiClient.shopItem.getAll();
-            // setShopItems(updatedShopItems);
-            //
-            // // Close modal and reset form
-            // setIsOpenModal(false);
-            // setEditingItem(null);
-            // form.reset();
+            setIsProcessing(true);
+
+            // Upload the image if provided
+            let imageUrl = editingItem?.image || "";
+            if (values.image) {
+                imageUrl = await uploadImage(values.image);
+            }
+
+            const payload = {
+                name: values.name,
+                description: values.description,
+                quantity: Number(values.quantity),
+                price: Number(values.price),
+                image: imageUrl,
+            };
+
+            if (editingItem) {
+                // Edit existing item
+                await apiClient.shopItem.updateOne(editingItem.id, payload, token as string);
+                toast.success("Shop item updated successfully!");
+            } else {
+                // Add new item
+                await apiClient.shopItem.createOne(payload, token as string);
+                toast.success("Shop item created successfully!");
+            }
+
+            // Refresh the list
+            const updatedShopItems = await apiClient.shopItem.getAll();
+            setShopItems(updatedShopItems);
+
+            // Close modal and reset form
+            setIsOpenModal(false);
+            setEditingItem(null);
+            form.reset();
         } catch (error: any) {
+            console.error(error);
             toast.error(error.toString());
         } finally {
             setIsProcessing(false);
         }
     };
 
+    const deleteShopItem = async (shopItemId: number) => {
+        try {
+            await apiClient.shopItem.deleteOne(shopItemId, token as string);
+            // Refresh the list
+            const updatedShopItems = await apiClient.shopItem.getAll();
+            setShopItems(updatedShopItems);
+            toast.info('Shop item is successfully deleted');
+        } catch (error: any) {
+            toast.error(error.toString());
+        }
+    }
 
     return (
         <Flex direction={'column'} pt={'md'}>
@@ -147,14 +153,70 @@ export default function AdminManageShopItems() {
                             <Table.Td>{shopItem.price}</Table.Td>
                             <Table.Td>
                                 <Group>
-                                    <Button>Edit</Button>
-                                    <Button color={'red'} variant={'outline'}>Delete</Button>
+                                    <Button
+                                        onClick={() => {
+                                            setEditingItem(shopItem);
+                                            form.setValues({
+                                                name: shopItem.name,
+                                                description: shopItem.description,
+                                                quantity: shopItem.quantity.toString(),
+                                                price: shopItem.price.toString(),
+                                                image: null,
+                                            });
+                                            setIsOpenModal(true);
+                                        }}
+                                    >
+                                        Edit
+                                    </Button>
+                                    <Button
+                                        color={'red'}
+                                        variant={'outline'}
+                                        onClick={() => {
+                                            setToBeDeleteShopItem(shopItem);
+                                        }}
+                                    >
+                                        Delete
+                                    </Button>
                                 </Group>
                             </Table.Td>
                         </Table.Tr>
                     ))
                 }</Table.Tbody>
             </Table>
+            {
+                toBeDeleteShopItem &&
+                <Modal
+                    size={'md'}
+                    opened={!!toBeDeleteShopItem}
+                    onClose={() => {setToBeDeleteShopItem(null)}}
+                    closeOnClickOutside={true}
+                    title={<h2>Delete Shop Item</h2>}
+                >
+                    <Text>
+                        This action will delete the shop item from platform, users can not see it anymore. Are you sure ?
+                    </Text>
+                    <Group mt={'xl'}>
+                        <Button
+                            color={'red'}
+                            variant={'outline'}
+                            onClick={() => {
+                                deleteShopItem((toBeDeleteShopItem as ShopItem).id);
+                            }}
+                        >
+                            Confirm
+                        </Button>
+                        <Button
+                            color={'gray'}
+                            variant={'outline'}
+                            onClick={() => {
+                                setToBeDeleteShopItem(null);
+                            }}
+                        >
+                            Close
+                        </Button>
+                    </Group>
+                </Modal>
+            }
             {
                 isOpenModal && <Modal
                     size={"md"}

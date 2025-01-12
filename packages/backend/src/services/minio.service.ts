@@ -26,25 +26,29 @@ export class MinioClient {
     }
 
     public async initializeBucket(): Promise<void> {
-        const bucketExists = await this.minioClient.bucketExists(this.bucketName);
-        if (!bucketExists) {
-            await this.minioClient.makeBucket(this.bucketName);
-            const policy = {
-                Version: 'v1',
-                Statement: [
-                    {
-                        Effect: 'Allow',
-                        Principal: {
-                            AWS: ['*'],
+        try {
+            const bucketExists = await this.minioClient.bucketExists(this.bucketName);
+            if (!bucketExists) {
+                await this.minioClient.makeBucket(this.bucketName);
+                const policy = {
+                    Version: '2012-10-17', // Correct version
+                    Statement: [
+                        {
+                            Effect: 'Allow',
+                            Principal: {
+                                AWS: ['*'],
+                            },
+                            Action: [
+                                's3:GetObject',
+                            ],
+                            Resource: [`arn:aws:s3:::${this.bucketName}/*`],
                         },
-                        Action: [
-                            's3:GetObject',
-                        ],
-                        Resource: [`arn:aws:s3:::${this.bucketName}/*`],
-                    },
-                ],
-            };
-            await this.minioClient.setBucketPolicy(this.bucketName, JSON.stringify(policy));
+                    ],
+                };
+                await this.minioClient.setBucketPolicy(this.bucketName, JSON.stringify(policy));
+            }
+        } catch(error: any) {
+            console.error(error);
         }
     }
 

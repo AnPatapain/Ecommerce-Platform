@@ -102,7 +102,7 @@ export class ShopItemController extends Controller{
      * @param errNotSupportedFileType
      */
     @Post('upload-image')
-    // @Security('token', ['shopItem.write'])
+    @Security('token', ['shopItem.write'])
     @SuccessResponse('201', 'Created')
     @Tags('Shop Item/Admin')
     public async uploadImage(
@@ -110,7 +110,9 @@ export class ShopItemController extends Controller{
         @Res() errNotSupportedFileType: TsoaResponse<400, APIErrorType>
     ){
         await this.handleFile(req);
+        console.log(req.file);
         const image = req.file as BufferedFile;
+        console.log('Image backend receives::', image);
         await this.minioClient.initializeBucket();
 
         if (!(image.mimetype.includes('jpeg') || image.mimetype.includes('png'))) {
@@ -118,7 +120,9 @@ export class ShopItemController extends Controller{
                 code: 'ERR_NOT_SUPPORTED_FILE_TYPE',
             });
         }
-        return this.minioClient.upload(image);
+        const imageUrl = await this.minioClient.upload(image);
+        console.log('imageUrl::', imageUrl);
+        return imageUrl;
     }
 
     /**
@@ -173,11 +177,14 @@ export class ShopItemController extends Controller{
 
     private handleFile(request: express.Request): Promise<void> {
         const multerSingle = multer().single("file");
+        console.log('Before being parsed by multer::', request.file);
+
         return new Promise((resolve, reject) => {
             multerSingle(request, null as any, async (error) => {
                 if (error) {
                     reject(error);
                 } else {
+                    console.log('After being parsed by multer::', request.file);
                     resolve();
                 }
             });

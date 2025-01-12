@@ -1,19 +1,19 @@
 import {User} from "@app/shared-models/src/user.model.ts";
 import {APIError} from "@app/shared-models/src/error.type.ts";
 import {
-    APITokenResponse,
-    SigninRequest,
-    MailVerificationResponse,
-    SignupRequest,
-    ResetPasswordRequest,
     APISuccessResponse,
-    SignupSuccessResponse,
+    APITokenResponse,
+    CartUpdateRequest,
+    MailVerificationResponse,
+    OrderCreationRequest,
+    ResetPasswordRequest,
     SellerCreationRequest,
     SellerCreationResponse,
-    CartUpdateRequest,
-    OrderCreationRequest,
     ShopItemCreationRequest,
-    ShopItemUpdateRequest
+    ShopItemUpdateRequest,
+    SigninRequest,
+    SignupRequest,
+    SignupSuccessResponse
 } from "@app/shared-models/src/api.type.ts";
 import {CONFIG} from "./frontend-config.ts";
 import {Order} from "@app/shared-models/src/order.model.ts";
@@ -43,6 +43,8 @@ export const apiClient = {
         getAll: () => sendRequest('GET', 'api/shop-item'),
         getOneById: (id: number, token: string): Promise<ShopItem> =>
             sendRequest('GET', `api/shop-item/${id}`, undefined, token),
+        uploadShopItemImage: (formData: FormData, token: string) =>
+            sendRequest('POST', 'api/shop-item/upload-image', formData, token),
         createOne: (data: ShopItemCreationRequest, token: string) =>
             sendRequest('POST', 'api/shop-item', data, token),
         updateOne: (shopItemId: number, data: ShopItemUpdateRequest, token: string) =>
@@ -84,13 +86,21 @@ async function sendRequest(
     const options: any = {
         method,
         headers: {
-            'Content-Type': 'application/json',
+            // 'Content-Type': 'application/json',
             'x-api-key': token ? token : '',
         }
     }
-    if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
-        options.body = JSON.stringify(body);
+    // Only set Content-Type if the body is not FormData
+    if (body && !(body instanceof FormData)) {
+        options.headers['Content-Type'] = 'application/json';
+        options.body = JSON.stringify(body); // Serialize JSON payload
+    } else if (body instanceof FormData) {
+        options.body = body; // Let the browser handle the Content-Type
     }
+
+    // if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+    //     options.body = JSON.stringify(body);
+    // }
     const response = await fetch(`${CONFIG.PUBLIC_URL}/${endpoint}`, options);
     if (!response.ok) {
         // Throw an error with the status and status text

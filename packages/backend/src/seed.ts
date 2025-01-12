@@ -2,7 +2,6 @@ import {UserRepository} from "./repositories/user.repository";
 import {ShopItemRepository} from "./repositories/shopItem.repository";
 import {ShopItemCreationRequest} from "@app/shared-models/src/api.type";
 
-const userRepository = UserRepository.getInstance();
 const shopItemRepository = ShopItemRepository.getInstance();
 
 const RepositoryToBeSeeded = [
@@ -12,11 +11,9 @@ const RepositoryToBeSeeded = [
 export async function seed() {
     const oneOfReposIsEmpty = await checkOneOfReposIsEmpty();
     if (oneOfReposIsEmpty) {
-        // await cleanEmptyRepos();
-        // console.log('Seed user');
-        // await seedUser();
-        // console.log('Seed shopItems');
-        // await seedShopItem();
+        await cleanEmptyRepos();
+        console.log('Seed shopItems');
+        await seedShopItem();
     }
 }
 
@@ -35,9 +32,6 @@ async function checkOneOfReposIsEmpty() {
         if (numsRecord === 0) return true;
     }
     return false;
-}
-
-async function seedUser() {
 }
 
 async function seedShopItem() {

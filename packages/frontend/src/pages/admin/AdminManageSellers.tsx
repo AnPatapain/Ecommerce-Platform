@@ -104,7 +104,6 @@ export default function AdminManageSellers() {
                                         variant={'outline'}
                                         onClick={() => {
                                             setToBeDeleteUser(seller);
-                                            // deleteSeller(seller.id);
                                         }}
                                     >
                                         Delete
