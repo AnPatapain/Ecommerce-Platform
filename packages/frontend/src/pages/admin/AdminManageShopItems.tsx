@@ -37,7 +37,7 @@ export default function AdminManageShopItems() {
             name: (value) => (value.trim() ? null : "Name is required"),
             description: (value) => (value.trim() ? null : "Description is required"),
             quantity: (value) =>
-                value && !isNaN(Number(value)) && Number(value) > 0
+                value && !isNaN(Number(value)) && Number(value) >= 0
                     ? null
                     : "Quantity must be a positive number",
             price: (value) =>
@@ -102,7 +102,9 @@ export default function AdminManageShopItems() {
 
     const deleteShopItem = async (shopItemId: number) => {
         try {
-            await apiClient.shopItem.deleteOne(shopItemId, token as string);
+            await apiClient.shopItem.updateOne(shopItemId, {
+                quantity: -1
+            }, token as string);
             // Refresh the list
             const updatedShopItems = await apiClient.shopItem.getAll();
             setShopItems(updatedShopItems);

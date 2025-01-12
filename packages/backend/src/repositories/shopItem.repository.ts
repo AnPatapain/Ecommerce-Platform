@@ -1,6 +1,5 @@
 import {PRISMA_CLIENT} from "../../prisma";
 import {ShopItem} from "@app/shared-models/src/shopItem.model";
-import {User} from "@prisma/client"
 import {ShopItemCreationRequest, ShopItemUpdateRequest} from "@app/shared-models/src/api.type";
 
 export class ShopItemRepository{

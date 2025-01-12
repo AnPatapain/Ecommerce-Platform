@@ -58,7 +58,8 @@ export const Home = () => {
             <h2>Our products</h2>
             <Grid>
                 {
-                    shopItems.map((shopItem: ShopItem) => (
+                    shopItems
+                        .map((shopItem: ShopItem) => (
                         <Grid.Col span={4} key={shopItem.id}>
                             <Card shadow="sm"
                                   padding="lg"
@@ -75,14 +76,15 @@ export const Home = () => {
 
                                 <Group justify="space-between" mt="md" mb="xs">
                                     <Text fw={500}>{shopItem.name}</Text>
-                                    <Badge color="green">Available</Badge>
+                                    {shopItem.quantity > 0 ? <Badge color="green">Available</Badge> :
+                                        <Badge color="gray">Out of stock</Badge>}
                                 </Group>
 
                                 <Text size="sm" c="dimmed">
                                     {shopItem.description}
                                 </Text>
 
-                                <Button disabled={isProcessing}
+                                <Button disabled={isProcessing || shopItem.quantity === 0}
                                         loading={isProcessing}
                                         loaderProps={{type: 'dots'}}
                                         fullWidth

@@ -21,6 +21,7 @@ import {ShopItemRepository} from "../repositories/shopItem.repository";
 import { MinioClient } from "../services/minio.service";
 import express, {response} from "express";
 import multer from "multer";
+import {ShopItem} from "@app/shared-models/src/shopItem.model";
 
 
 
@@ -38,7 +39,8 @@ export class ShopItemController extends Controller{
     @SuccessResponse('200', 'OK')
     @Tags('Shop Item')
     public async getAllShopItems(){
-        return this.shopItemRepository.findAll();
+        const shopItems = await this.shopItemRepository.findAll();
+        return shopItems.filter((shopItem: ShopItem) => shopItem.quantity >= 0);
     }
 
 
