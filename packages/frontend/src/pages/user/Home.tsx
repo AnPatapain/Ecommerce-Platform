@@ -1,35 +1,107 @@
-import {Badge, Button, Card, Container, Group, Image, Text} from "@mantine/core";
-import {useNavigate} from "react-router-dom";
+import {Badge, Button, Card, Container, Grid, Group, Image, Text} from "@mantine/core";
+import {useEffect, useState} from "react";
+import {apiClient} from "../../api-client.ts";
+import {ShopItem} from "@app/shared-models/src/shopItem.model.ts";
+import {useAuth} from "../../auth.context.tsx";
+import {toast} from "react-toastify";
 
 export const Home = () => {
-    const navigate = useNavigate();
+    const [shopItems, setShopItems] = useState<ShopItem[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const {token, currentUser, reloadAuthContext} = useAuth();
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    useEffect(() => {
+        async function fetchShopItems() {
+            try {
+                const shopItems_ = await apiClient.shopItem.getAll();
+                setShopItems(shopItems_);
+            } catch (error: any) {
+                setError(error.toString());
+            }
+        }
+
+        fetchShopItems();
+    }, []);
+
+    const handleAddToCart = async (shopItem: ShopItem) => {
+        if (!token) {
+            toast.info(`Please signin to add ${shopItem.name} to cart`);
+            return;
+        }
+        if (currentUser && currentUser.cart && currentUser.cart.shopItems) {
+            if (
+                currentUser.cart.shopItems.find(
+                    (existingShopItem => existingShopItem.shopItemId === shopItem.id))
+            ) {
+                toast.info(`You have already added this item in cart. Please order it.`);
+                return;
+            }
+        }
+        try {
+            setIsProcessing(true);
+            await apiClient.cart.addShopItemToCart({
+                shopItemsToAdd: [shopItem.id],
+                shopItemsToRemove: [],
+            }, token);
+            await reloadAuthContext();
+            setIsProcessing(false);
+            toast.success('Product is added to cart successfully.');
+        } catch (error: any) {
+            setIsProcessing(false)
+            setError(error.toString());
+        }
+    }
 
     return (
-        <Container size={'xs'}>
-            <h3>Fullstack MERN Boilerplate powered by: TypeScript, Node, React, Docker, Nginx, BashScript.</h3>
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-                <Card.Section>
-                    <Image
-                        src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-8.png"
-                        height={160}
-                        alt="Norway"
-                    />
-                </Card.Section>
+        <Container size={'md'} mt={'xl'}>
+            <h2>Our products</h2>
+            <Grid>
+                {
+                    shopItems
+                        .map((shopItem: ShopItem) => (
+                        <Grid.Col span={4} key={shopItem.id}>
+                            <Card shadow="sm"
+                                  padding="lg"
+                                  radius="md" withBorder
+                                  style={{height: '100%'}}
+                            >
+                                <Card.Section>
+                                    <Image
+                                        src={shopItem.image}
+                                        height={160}
+                                        alt="Norway"
+                                    />
+                                </Card.Section>
 
-                <Group justify="space-between" mt="md" mb="xs">
-                    <Text fw={500}>Product</Text>
-                    <Badge color="pink">On Sale</Badge>
-                </Group>
+                                <Group justify="space-between" mt="md" mb="xs">
+                                    <Text fw={500}>{shopItem.name}</Text>
+                                    {shopItem.quantity > 0 ? <Badge color="green">Available</Badge> :
+                                        <Badge color="gray">Out of stock</Badge>}
+                                </Group>
 
-                <Text size="sm" c="dimmed">
-                    With Fjord Tours you can explore more of the magical fjord landscapes with tours and
-                    activities on and around the fjords of Norway
-                </Text>
+                                <Text size="sm" c="dimmed">
+                                    {shopItem.description}
+                                </Text>
 
-                <Button mt="md" radius="md" onClick={() => {navigate('/order-product')}}>
-                    Order now
-                </Button>
-            </Card>
+                                <Button disabled={isProcessing || shopItem.quantity === 0}
+                                        loading={isProcessing}
+                                        loaderProps={{type: 'dots'}}
+                                        fullWidth
+                                        radius="md"
+                                        style={{marginTop: 'auto'}}
+                                        onClick={() => {
+                                            handleAddToCart(shopItem)
+                                        }}
+                                >
+                                    Add to card
+                                </Button>
+                            </Card>
+                        </Grid.Col>
+                    ))
+                }
+            </Grid>
+            {error && toast.error(error)}
         </Container>
     );
 };

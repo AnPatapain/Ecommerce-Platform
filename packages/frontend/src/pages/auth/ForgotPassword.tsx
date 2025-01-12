@@ -5,7 +5,7 @@ import {useForm} from "@mantine/form";
 import {getEmailValidator} from "@app/shared-utils/src/email-validator.ts";
 import {MailVerificationResponse} from "@app/shared-models/src/api.type.ts";
 import {APIError} from "@app/shared-models/src/error.type.ts";
-import {Alert, Button, Container, Group, TextInput} from "@mantine/core";
+import {Alert, Button, Container, Group, Text, TextInput} from "@mantine/core";
 import AppLink from "../../components/AppLink.tsx";
 
 export default function ForgotPassword() {
@@ -73,16 +73,19 @@ export default function ForgotPassword() {
                 </Group>
                 {
                     verificationNoti && (
-                        <Alert variant="light" color="blue" title="Notification">
-                            {verificationNoti.message}
+                        <Alert variant="light" color="blue" title="Notification" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                            <Text>
+                                {verificationNoti.message}
+                            </Text>
                             <br/>
                             <AppLink href={verificationNoti.mailBox}
                                     openInNewTab={true}>{verificationNoti.mailBox}</AppLink>
                             <br/>
                             <br/>
-                            Notice: For this school project, we use a shared fake SMTP mailbox to avoid spamming real
-                            inboxes. Please be aware that this is not secure, as anyone can guess another user's email and
-                            reset password for them.
+                            <Text size={'xs'} style={{display: 'block'}}>
+                                Notice: For this school project, we use a shared fake SMTP mailbox to avoid spamming your mailbox.
+                                Please be aware that this is not secured for real production, as anyone can guess another user's email and reset password for them.
+                            </Text>
                         </Alert>
                     )
                 }

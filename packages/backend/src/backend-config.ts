@@ -20,6 +20,13 @@ type EnvironmentConfig = {
     SMTP_PORT?: string,
     SMTP_USER?: string,
     SMTP_PASSWORD?: string,
+    MINIO_ENDPOINT?: string,
+    MINIO_PORT?: string,
+    MINIO_ROOT_USER?: string,
+    MINIO_ROOT_PASSWORD?: string,
+    MINIO_ACCESS_KEY?: string,
+    MINIO_SECRET_KEY?: string,
+    MINIO_BUCKET_NAME?: string,
 };
 
 const env: EnvironmentConfig = process.env as any;
@@ -33,5 +40,10 @@ export const CONFIG: typeof env= {
     SMTP_PORT: '587',
     SMTP_USER: 'raphaelle.stamm95@ethereal.email',
     SMTP_PASSWORD: 'ujDd9JezSyrnNvxCZA',
+    MINIO_ENDPOINT: 'minio',
+    MINIO_PORT: '9000',
+    MINIO_ACCESS_KEY: env.MINIO_ROOT_USER,
+    MINIO_SECRET_KEY: env.MINIO_ROOT_PASSWORD,
+    MINIO_BUCKET_NAME: 'shop-bucket',
     ...env,
 }

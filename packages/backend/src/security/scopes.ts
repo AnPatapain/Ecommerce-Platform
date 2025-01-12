@@ -2,16 +2,22 @@ import {UserRole} from "@app/shared-models/src/user.model";
 import {Token} from "@app/shared-models/src/token.model";
 
 export type SecurityScope =
-    | 'user.read'               // read all users
-    | 'user.write'              // write all users
-    | 'user:current.verify'     // Special permission: verify user
-    | 'user:current.read'       // read current user
-    | 'user:current.write'      // write current user
-    | 'token:current.read'      // read all token belong to you
-    | 'token:current.write'     // write all token belong to you
-    | 'shopItem:create'
-    | 'shopItem:update'
-    | 'shopItem:delete'
+    | 'user.read'           // read all users
+    | 'user.write'          // write all users
+    | 'user:current.verify'         // Special permission: verify user
+    | 'user:current.read'   // read current user
+    | 'user:current.write'  // write current user
+    | 'token:current.read'  // read all token belong to you
+    | 'token:current.write' // write all token belong to you
+    | 'shopItem.read'
+    | 'shopItem.write'
+    | 'cart:current.read'
+    | 'cart:current.write'
+    | 'order:current.read'
+    | 'order.read'
+    | 'order.write'
+    | 'order:current.write';
+
 
 export const API_VERIFICATION_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
     'user:current.verify',
@@ -21,20 +27,37 @@ export const RESET_PASSWORD_TOKEN: Set<SecurityScope> = new Set<SecurityScope>([
     'user:current.write',
 ])
 
-export const USER_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
+export const BASE_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
     'user:current.read',
     'user:current.write',
     'token:current.read',
     'token:current.write',
+    'order:current.read',
+    'order:current.write',
+]);
+
+export const USER_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
+    ...BASE_SCOPES,
+    'cart:current.read',
+    'cart:current.write',
+    'order:current.read',
+    'order:current.write',
+]);
+
+export const SELLER_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
+    ...USER_SCOPES,
+    'user.read',
+    'order.read',
+    'order.write',
 ]);
 
 export const ADMIN_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([
-    ...USER_SCOPES,
+    ...BASE_SCOPES,
     'user.read',
     'user.write',
-    'shopItem:create',
-    'shopItem:update',
-    'shopItem:delete',
+    'order.read',
+    'shopItem.read',
+    'shopItem.write',
 ]);
 
 export function getScopesBasedOnUserRoleOrTokenType(userRole: UserRole, token: Token) {
@@ -57,9 +80,9 @@ export function getScopesBasedOnUserRoleOrTokenType(userRole: UserRole, token: T
 
         else if (token.tokenType === 'reset_password') return RESET_PASSWORD_TOKEN;
 
-        // TODO: change to seller scope
-        return ADMIN_SCOPES;
+        return SELLER_SCOPES;
     }
+
     else {
         return USER_SCOPES;
     }

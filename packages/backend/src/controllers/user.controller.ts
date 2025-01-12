@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Post, Query, Request, Res, Route, Security, type TsoaResponse} from "tsoa";
+import {Body, Controller, Delete, Get, Post, Query, Request, Res, Route, Security, Tags, type TsoaResponse} from "tsoa";
 import {UserRepository} from "../repositories/user.repository";
 import express from "express";
 import {APISuccessResponse, type SellerCreationRequest, SellerCreationResponse} from "@app/shared-models/src/api.type";
@@ -13,16 +13,31 @@ import {APIErrorType} from "@app/shared-models/src/error.type";
 export class UserController extends Controller {
     private userRepository: UserRepository = UserRepository.getInstance();
 
+    /**
+     * Retrieve the current user's information.
+     * @param req - The request object.
+     * @returns The current user's information.
+     */
     @Get('current')
     @Security('token', ['user:current.read'])
+    @Tags('User/Current')
     public async getCurrentUser(@Request() req: express.Request) {
         return req.securityContext ? req.securityContext.user : null;
     }
 
     ////////////////
     // Admin routes
+
+
+    /**
+     * Create a new seller.
+     * @param sellerCreationRequest - The seller creation request data.
+     * @param errUserAlreadyExisted - Response if the user already exists.
+     * @returns The created seller and a mail preview URL.
+     */
     @Post('')
     @Security('token', ['user.write'])
+    @Tags('User/Admin')
     public async createSeller(
         @Body() sellerCreationRequest: SellerCreationRequest,
         @Res() errUserAlreadyExisted: TsoaResponse<409, APIErrorType>
@@ -47,13 +62,30 @@ export class UserController extends Controller {
         const mailPreviewUrl = await this._sendSellerResetPasswordEmail(user);
 
         return {
-            createdSeller: updatedUser,
+            createdSeller: {
+                ...updatedUser,
+                cart: updatedUser.cart? {...updatedUser.cart} : undefined,
+            },
             mailPreviewUrl: mailPreviewUrl,
         };
     }
 
+    @Get('{userId}')
+    @Security('token', ['user.read'])
+    @Tags('User/Admin')
+    public async getUserById(userId: number): Promise<User | null> {
+        return await this.userRepository.findOneById(userId);
+    }
+
+
+    /**
+     * Retrieve all users by role.
+     * @param role - The role of the users to retrieve.
+     * @returns The users with the specified role.
+     */
     @Get('')
     @Security('token', ['user.read'])
+    @Tags('User/Admin')
     public async getAllUsersByRole(
         @Query() role: UserRole,
     ) {
@@ -61,8 +93,14 @@ export class UserController extends Controller {
         return users.filter(user => user.role === role);
     }
 
+    /**
+     * Delete a seller by user ID.
+     * @param userId - The ID of the user to delete.
+     * @returns A success response indicating the user was deleted.
+     */
     @Delete('{userId}')
     @Security('token', ['user.write'])
+    @Tags('User/Admin')
     public async deleteSeller(
         userId: number,
     ): Promise<APISuccessResponse> {

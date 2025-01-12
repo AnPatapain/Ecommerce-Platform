@@ -1,4 +1,4 @@
-import {Alert, Button, Container, Group, TextInput} from "@mantine/core";
+import {Alert, Button, Container, Group, Text, TextInput} from "@mantine/core";
 import { useState} from "react";
 import {useAuth} from "../../auth.context.tsx";
 import {useForm} from "@mantine/form";
@@ -74,15 +74,16 @@ export default function SendVerifyAccountEmail() {
                 </Group>
                 {
                     verificationNoti && (
-                        <Alert variant="light" color="blue" title="Notification">
+                        <Alert variant="light" color="blue" title="Notification" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                             {verificationNoti.message}
                             <br/>
                             <AppLink href={verificationNoti.mailBox} openInNewTab={true}>{verificationNoti.mailBox}</AppLink>
                             <br/>
                             <br/>
-                            Notice: For this school project, we use a shared fake SMTP mailbox to avoid spamming real
-                            inboxes. Please be aware that this is not secure, as anyone can verify another user's email
-                            to get the API access token.
+                            <Text size={'xs'} style={{display: 'block'}}>
+                                Notice: For this school project, we use a shared fake SMTP mailbox to avoid spamming your mailbox.
+                                Please be aware that this is not secured for real production.
+                            </Text>
                         </Alert>
                     )
                 }

@@ -28,15 +28,14 @@ export async function expressAuthentication(
         if (!user) {
             throw new APIError(403, 'ERR_TOKEN_SUBJECT_INVALID');
         }
+        const userScopes = getScopesBasedOnUserRoleOrTokenType(user.role, token)
 
-        const userScopes = getScopesBasedOnUserRoleOrTokenType(user.role, token);
         for (let requiredScope of scopes as SecurityScope[]) {
             if (!userScopes.has(requiredScope)) {
                 console.log('Blocked here');
                 throw new APIError(403, 'ERR_PERMISSION_DENIED');
             }
         }
-
         req.securityContext = {
             user: user,
             scopes: userScopes,
