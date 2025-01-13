@@ -24,7 +24,8 @@
 By using Docker, we avoid populating your host machine. Simply install Docker, and you're ready to go.
 
 
-**Fullstack Skeleton overview**
+## PORN stack overview
+FYI, PORN stack is postgresql, react, node. Here is the details stack breakdown:
 - **Infrastructure:** Nginx, Docker, Postgresql, TLS-SSL for local development environment, Let's Encrypt for production
 - **Programming Language:** Typescript, Bash Script
 - **Backend:** Express (server framework), Tsoa-Swagger(controller & auto API docs), Postgresql (relational database), Prisma (ORM) 
@@ -49,8 +50,7 @@ MINIO_ROOT_USER=miniouser
 MINIO_ROOT_PASSWORD=miniopassword
 ```
 From root project, `./runner` is the entry point
-command to run different environments: development, production, test,
-reset environment, etc.
+command to run different environments: development, production, reset environment, etc.
 #### Run Development
 ``` bash
 ./runner dev
