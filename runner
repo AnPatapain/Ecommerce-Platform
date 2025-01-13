@@ -228,12 +228,12 @@ sync_env_files() {
   ln -sf "${ROOT_PROJECT}"/.env "${ROOT_PROJECT}"/packages/frontend/.env
 }
 
-# Function to build frontend static files on production
+# Function to build frontend pictures-for-docs files on production
 run_build_fe_prod() {
   pnpm install && pnpm run build
 }
 
-# Function to build frontend static files on staging
+# Function to build frontend pictures-for-docs files on staging
 run_build_fe_staging() {
   pnpm install && pnpm run build:staging
 }
@@ -317,7 +317,14 @@ elif [[ "$1" = "clean" ]]; then
   exit 0
 
 elif [[ "$1" = "dev" ]]; then
-  run_dev
+  check_prerequisite
+  # Check if check_prerequisite exited successfully (exit code 0)
+  if [[ $? -eq 0 ]]; then
+    run_dev
+  else
+    echo "Prerequisites not met. Exiting."
+    exit 1
+  fi
   exit 0
 
 elif [[ "$1" = "up" ]]; then

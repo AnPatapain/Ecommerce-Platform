@@ -1,6 +1,6 @@
 # docker-compose-prod.yml
 # This docker compose sets up the service required in production environment.
-# Specifically, the frontend file is built to static file and served by nginx,
+# Specifically, the frontend file is built to pictures-for-docs file and served by nginx,
 # the database is not in container anymore but will be defined in .env file
 # in production server (my OVH server)
 # Author: Ke An Nguyen

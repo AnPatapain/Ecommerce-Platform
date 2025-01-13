@@ -1,6 +1,6 @@
 # docker-compose.staging.yml
 # This docker compose sets up the services required in staging environment.
-# Specifically, it mimics the production environment by building static frontend
+# Specifically, it mimics the production environment by building pictures-for-docs frontend
 # file and make nginx serve it, the backend is running without hot reloading
 # Author: Ke An Nguyen
 

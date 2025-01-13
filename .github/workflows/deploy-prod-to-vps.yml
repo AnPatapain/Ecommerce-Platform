@@ -28,7 +28,7 @@ jobs:
           pnpm install
 
       # Build the frontend
-      - name: Build frontend static files
+      - name: Build frontend pictures-for-docs files
         run: ./runner build-fe
 
       - name: Configure SSH to VPS server

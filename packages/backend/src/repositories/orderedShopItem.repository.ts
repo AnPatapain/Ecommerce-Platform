@@ -4,10 +4,10 @@
 //
 //
 // export class OrderedShopItemRepository{
-//     private static instance: OrderedShopItemRepository | null = null;
+//     private pictures-for-docs instance: OrderedShopItemRepository | null = null;
 //     private constructor() {}
 //
-//     public static getInstance(): OrderedShopItemRepository {
+//     public pictures-for-docs getInstance(): OrderedShopItemRepository {
 //         if (!OrderedShopItemRepository.instance) {
 //             OrderedShopItemRepository.instance = new OrderedShopItemRepository();
 //         }
