@@ -204,6 +204,24 @@ clean_app() {
   fi
 }
 
+clean_prod() {
+  if [[ "$1" = "--force-proceed" ]]; then
+      local proceed="y"
+  else
+    read -r -p "Data on dev database will be lost. Proceed? (y/n): " proceed
+  fi
+
+  if [[ "$proceed" =~ ^[yY]$ ]]; then
+    docker compose -f "${DOCKER_COMPOSE_DEV}" down -t 1 --volumes --remove-orphans
+    docker compose -f "${DOCKER_COMPOSE_PROD}" down -t 1 --volumes --remove-orphans
+    sudo rm -rf node_modules packages/*/node_modules packages/*/dist
+    sudo rm -rf packages/backend/tsoa
+    sudo rm pnpm-lock.yaml
+    sudo rm -rf .pnpm-store
+    echo "node_modules, dist, nginx config files, postgres_data_dev volume removed successfully !"
+  fi
+}
+
 # Internal Function to synchronize the env file in ROOT_PROJECT and packages/backend by using symbolic link
 sync_env_files() {
   ln -sf "${ROOT_PROJECT}"/.env "${ROOT_PROJECT}"/packages/backend/.env
@@ -312,7 +330,7 @@ elif [[ "$1" = "build-fe" ]]; then
   exit 0
 
 elif [[ "$1" = "prod" ]]; then
-  clean_app --force-proceed
+  clean_prod --force-proceed
   run_prod
   exit 0
 
