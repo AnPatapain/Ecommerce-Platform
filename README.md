@@ -11,6 +11,7 @@
 ![Swagger 5.x.x](https://img.shields.io/badge/swagger_api_docs-5.0.1-green.svg)
 
 **Go live:** https://vps-3131144f.vps.ovh.net/  
+**API Docs** https://vps-3131144f.vps.ovh.net/api/docs/
 
 **Admin credentials on prod** 
 - admin@ecm.fr
@@ -142,6 +143,11 @@ is always asked to reset their password on the first sign-in.
 After successfully sign in as seller. Seller can now validate the orders.
 ![img_17.png](pictures-for-docs/img_17.png)
 ![img_18.png](pictures-for-docs/img_18.png)
+
+API Documentation  
+- On local: https://localhost/api/docs
+- On prod: https://vps-3131144f.vps.ovh.net/api/docs/
+![img.png](pictures-for-docs/img19.png)
 
 ## Architecture
 #### Development infrastructure  
