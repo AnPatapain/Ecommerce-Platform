@@ -29,6 +29,8 @@ type EnvironmentConfig = {
     MINIO_BUCKET_NAME?: string,
     ADMIN_EMAIL?: string,
     ADMIN_PASSWORD?: string,
+    DEFAULT_SELLER?: string,
+    DEFAULT_SELLER_PASSWORD?: string,
 };
 
 const env: EnvironmentConfig = process.env as any;
@@ -47,7 +49,14 @@ export const CONFIG: typeof env= {
     MINIO_ACCESS_KEY: env.MINIO_ROOT_USER,
     MINIO_SECRET_KEY: env.MINIO_ROOT_PASSWORD,
     MINIO_BUCKET_NAME: 'shop-bucket',
-    ADMIN_EMAIL: env.ADMIN_EMAIL,
-    ADMIN_PASSWORD: env.ADMIN_PASSWORD,
+
+    // These variables will be used in seed.ts, only seeds on dev => doesn't affect prod and staging.
+    // These variables will be overwritten if they are defined in your .env file
+    ADMIN_EMAIL: 'admin@ecm.fr',
+    ADMIN_PASSWORD: 'azerty',
+    DEFAULT_SELLER: 'seller@ecm.fr',
+    DEFAULT_SELLER_PASSWORD: 'azerty',
+
+    // Overwrite the variables.
     ...env,
 }

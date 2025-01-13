@@ -1,9 +1,9 @@
 #!/bin/bash
 ############################################################################
 # entrypoint
-# Entry point for running development, production, test environment
+# Entry point for running development, staging, production environment
 # Run entrypoint --help to see all supported operations
-# Author: Ke An Nguyen
+# Author: Ke An Nguyen & Anh Tuan Nguyen
 ############################################################################
 
 
@@ -14,7 +14,7 @@
 SCRIPT_DIR="$(dirname $0)"
 cd "${SCRIPT_DIR}"
 
-# UserPagesTemplate project dir
+# Project dir
 ROOT_PROJECT="$(pwd)"
 export ROOT_PROJECT
 
@@ -54,18 +54,18 @@ if [ "$EUID" -eq 0 ]; then
 fi
 
 display_help() {
-  echo "Usage: ./run.sh [COMMAND]"
+  echo "Usage: ./runner [COMMAND]"
   echo ""
   echo "Entry point to run application in the dev, prod or test environment"
-  echo "Provide also options to: list prerequisites, check prerequisites, clean the project."
   echo ""
   echo "Commands:"
   echo "  help                 Display this help message and exit"
-  echo "  list-prerequisite    Display prerequisite"
-  echo "  prerequisite         Check whether required prerequisite is met and show the guide how to fix"
+  echo "  list-prerequisite    Display prerequisite for staging and production"
+  echo "  prerequisite         Check whether required prod prerequisite is met and show the guide how to fix"
   echo "  create-tls-certs     Create TLS certificates (for local dev environment)"
-  echo "  dev                  Run the application in the local development environment"
-  echo "  prod                 Build and run the application in production mode with Nginx serving the frontend"
+  echo "  dev                  Run application in the local development environment (hot reload included)"
+  echo "  staging              Run application in staging environment (simulate production environment on local)"
+  echo "  prod                 Build and run application in production mode with Nginx serving the frontend"
   echo "  clean                Remove build artifacts, node_modules, docker-volume and clean the environment"
   echo ""
   echo "Options:"
@@ -79,8 +79,8 @@ display_help() {
   echo "  ./runner staging     Build and deploy the app in staging mode (mimic production)"
   echo ""
   echo "Important Notes"
-  echo "- Don't run run.sh with 'sudo'"
-  echo "- run 'run.sh clean' before switching between development and production modes for a clean setup."
+  echo "- Don't run it with 'sudo'"
+  echo "- Use './runner clean' before switching between development and production modes for a clean setup."
 }
 
 # Function that lists all prerequisite
@@ -178,7 +178,7 @@ create_tls_certificates() {
   echo "TLS key and cert created successfully !"
 }
 
-check_minio() {
+check_and_create_minio_mount_point() {
   if [[ ! -d "$MINIO" ]]; then
     mkdir -p "$MINIO"
   fi
@@ -223,6 +223,7 @@ run_build_fe_staging() {
 # Function to run the application in production mode
 run_prod() {
   sync_env_files
+  check_and_create_minio_mount_point
   export DOCKER_PROD_ENTRY_CMD="pnpm install && pnpm run prod"
   mkdir -p node_modules
   docker compose -f "${DOCKER_COMPOSE_PROD}" build --no-cache
@@ -235,7 +236,7 @@ run_prod() {
 # Function to start Docker Compose in development mode
 run_dev() {
   sync_env_files
-  check_minio
+  check_and_create_minio_mount_point
   # DOCKER_DEV_ENTRY_CMD will be used in DOCKER_COMPOSE_DEV file as an entry point to run the application in dev env
   export DOCKER_DEV_ENTRY_CMD="pnpm i && pnpm run dev"
   mkdir -p node_modules
@@ -268,6 +269,7 @@ run_up(){
 
 run_staging() {
   sync_env_files
+  check_and_create_minio_mount_point
   export DOCKER_STAGING_ENTRY_CMD="pnpm i && pnpm run prod"
   docker compose -f "${DOCKER_COMPOSE_STAGING}" build --no-cache
   docker compose -f "${DOCKER_COMPOSE_STAGING}" up --remove-orphans -d
@@ -297,14 +299,7 @@ elif [[ "$1" = "clean" ]]; then
   exit 0
 
 elif [[ "$1" = "dev" ]]; then
-  check_prerequisite
-  # Check if check_prerequisite exited successfully (exit code 0)
-  if [[ $? -eq 0 ]]; then
-    run_dev
-  else
-    echo "Prerequisites not met. Exiting."
-    exit 1
-  fi
+  run_dev
   exit 0
 
 elif [[ "$1" = "up" ]]; then
