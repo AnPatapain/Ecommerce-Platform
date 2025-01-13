@@ -102,6 +102,7 @@ export default function AdminManageShopItems() {
 
     const deleteShopItem = async (shopItemId: number) => {
         try {
+            setIsProcessing(true);
             await apiClient.shopItem.updateOne(shopItemId, {
                 quantity: -1
             }, token as string);
@@ -111,6 +112,8 @@ export default function AdminManageShopItems() {
             toast.info('Shop item is successfully deleted');
         } catch (error: any) {
             toast.error(error.toString());
+        } finally {
+            setIsProcessing(false);
         }
     }
 
@@ -199,6 +202,9 @@ export default function AdminManageShopItems() {
                     </Text>
                     <Group mt={'xl'}>
                         <Button
+                            loading={isProcessing}
+                            loaderProps={{type: 'dots'}}
+                            disabled={isProcessing}
                             color={'red'}
                             variant={'outline'}
                             onClick={() => {
