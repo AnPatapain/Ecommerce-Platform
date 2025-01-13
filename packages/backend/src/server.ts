@@ -51,6 +51,7 @@ app.use(function errorHandler(
 
 // Seed data (only in development environment)
 if (CONFIG.NODE_ENV === 'development') {
+    console.log('Seeding data');
     await seed();
 }
 

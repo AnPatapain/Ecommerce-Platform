@@ -14,6 +14,9 @@ export class ShopItemRepository{
         return ShopItemRepository.instance;
     }
 
+    /**
+     * Retrieve all shop items.
+     */
     public async findAll() : Promise<Array<ShopItem>> {
         return PRISMA_CLIENT.shopItem.findMany({
             include: {
@@ -23,6 +26,10 @@ export class ShopItemRepository{
         });
     }
 
+    /**
+     * Retrieve a specific shop item by ID.
+     * @param id
+     */
     public async findById(id: number): Promise<ShopItem | null> {
         return PRISMA_CLIENT.shopItem.findUnique({
             where: {
@@ -35,6 +42,10 @@ export class ShopItemRepository{
         });
     }
 
+    /**
+     * Retrieve a specific shop item by name.
+     * @param name
+     */
     public async findByName(name: string): Promise<ShopItem | null> {
         return PRISMA_CLIENT.shopItem.findUnique({
             where: {
@@ -47,6 +58,10 @@ export class ShopItemRepository{
         });
     }
 
+    /**
+     * Create a new shop item.
+     * @param shopItemCreationData
+     */
     public async createOne(shopItemCreationData: ShopItemCreationRequest){
         return PRISMA_CLIENT.shopItem.create({
             data: {
@@ -61,6 +76,11 @@ export class ShopItemRepository{
         });
     }
 
+    /**
+     * Update a specific shop item by ID.
+     * @param id
+     * @param shopItemUpdateData
+     */
     public async updateOne(id: number, shopItemUpdateData: ShopItemUpdateRequest){
         return PRISMA_CLIENT.shopItem.update({
             where: {
@@ -74,10 +94,16 @@ export class ShopItemRepository{
         });
     }
 
+    /**
+     * Delete a specific shop item by ID.
+     */
     public async deleteMany() {
         return PRISMA_CLIENT.shopItem.deleteMany({});
     }
 
+    /**
+     * Count the number of shop items.
+     */
     public async count(): Promise<number> {
         return PRISMA_CLIENT.shopItem.count();
     }

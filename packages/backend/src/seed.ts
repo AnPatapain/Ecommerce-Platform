@@ -1,10 +1,12 @@
 import {UserRepository} from "./repositories/user.repository";
 import {ShopItemRepository} from "./repositories/shopItem.repository";
 import {ShopItemCreationRequest} from "@app/shared-models/src/api.type";
-
+import {generatePasswordHashed} from "./services/auth.service";
+import {CONFIG} from "./backend-config";
 const shopItemRepository = ShopItemRepository.getInstance();
-
+const userRepository = UserRepository.getInstance();
 const RepositoryToBeSeeded = [
+    userRepository,
     shopItemRepository,
 ]
 
@@ -14,6 +16,8 @@ export async function seed() {
         await cleanEmptyRepos();
         console.log('Seed shopItems');
         await seedShopItem();
+        console.log('Seed admin');
+        await seedAdmin();
     }
 }
 
@@ -32,6 +36,19 @@ async function checkOneOfReposIsEmpty() {
         if (numsRecord === 0) return true;
     }
     return false;
+}
+
+async function seedAdmin() {
+    const admin = {
+        email: CONFIG.ADMIN_EMAIL as string,
+        password:generatePasswordHashed(CONFIG.ADMIN_PASSWORD as string),
+        name:"admin",
+        verified:true,
+    }
+    const createdAdmin = await userRepository.createOne({
+        ...admin
+    });
+    await userRepository.updateOne(createdAdmin.id, {role: 'admin'});
 }
 
 async function seedShopItem() {

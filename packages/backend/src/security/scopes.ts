@@ -9,14 +9,14 @@ export type SecurityScope =
     | 'user:current.write'  // write current user
     | 'token:current.read'  // read all token belong to you
     | 'token:current.write' // write all token belong to you
-    | 'shopItem.read'
-    | 'shopItem.write'
-    | 'cart:current.read'
-    | 'cart:current.write'
-    | 'order:current.read'
-    | 'order.read'
-    | 'order.write'
-    | 'order:current.write';
+    | 'shopItem.read'      // read all shop items
+    | 'shopItem.write'    // write all shop items
+    | 'cart:current.read'  // user read current cart
+    | 'cart:current.write' // user write current cart
+    | 'order:current.read' // user read current order
+    | 'order.read'     // read all orders
+    | 'order.write'         // write all orders
+    | 'order:current.write';    // user write current order
 
 
 export const API_VERIFICATION_SCOPES: Set<SecurityScope> = new Set<SecurityScope>([

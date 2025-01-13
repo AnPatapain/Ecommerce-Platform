@@ -13,6 +13,10 @@ export class UserRepository {
         return UserRepository.instance;
     }
 
+    /**
+     * Find a user by email.
+     * @param email
+     */
     public async findByEmail(email: string): Promise<User | null> {
         const user = await PRISMA_CLIENT.user.findUnique({
             where: {
@@ -26,6 +30,9 @@ export class UserRepository {
         } : null;
     }
 
+    /**
+     * Retrieve all users.
+     */
     public async findAll() : Promise<Array<User>> {
         const users = await PRISMA_CLIENT.user.findMany({});
         return users.map((user: any) => {
@@ -36,6 +43,10 @@ export class UserRepository {
         })
     }
 
+    /**
+     * Find a user by ID.
+     * @param id
+     */
     public async findOneById(id: number): Promise<User | null> {
         const user = await PRISMA_CLIENT.user.findUnique({
             where: {
@@ -57,6 +68,10 @@ export class UserRepository {
         } : null;
     }
 
+    /**
+     * Delete a user by ID.
+     * @param id
+     */
     public async deleteOneById(id: number) {
         return PRISMA_CLIENT.user.delete({
             where: {
@@ -65,14 +80,24 @@ export class UserRepository {
         });
     }
 
+    /**
+     * !Unimplemented
+     */
     public async deleteMany() {
         return PRISMA_CLIENT.user.deleteMany({});
     }
 
+    /**
+     * !Unimplemented
+     */
     public async count(): Promise<number> {
         return PRISMA_CLIENT.user.count();
     }
 
+    /**
+     * Create a new user.
+     * @param userCreationData
+     */
     public async createOne(userCreationData: Omit<User, "id" | "role">): Promise<User> {
         const createdUser = await PRISMA_CLIENT.user.create({
             data: {
@@ -90,6 +115,11 @@ export class UserRepository {
         }
     }
 
+    /**
+     * Update a user by ID.
+     * @param id
+     * @param userEditData
+     */
     public async updateOne(id: number, userEditData: Partial<Omit<User, "id">>) {
         const updatedUser = await PRISMA_CLIENT.user.update({
             where: { id },

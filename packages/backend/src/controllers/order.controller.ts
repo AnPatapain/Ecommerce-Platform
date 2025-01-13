@@ -30,6 +30,10 @@ export class OrderController extends Controller{
     private cartRepository: CartRepository = CartRepository.getInstance();
 
 
+    /**
+     * Retrieve all orders of the current user.
+     * @param req
+     */
     @Get('/me')
     @Security('token', ['order:current.read'])
     @SuccessResponse('200', 'OK')

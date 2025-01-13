@@ -15,6 +15,9 @@ export class CartRepository {
         return CartRepository.instance;
     }
 
+    /**
+     * Retrieve all carts.
+     */
     public async findAll() : Promise<Array<Cart>> {
         return PRISMA_CLIENT.cart.findMany({
             include: {
@@ -23,6 +26,10 @@ export class CartRepository {
         });
     }
 
+    /**
+     * Retrieve a specific cart by ID.
+     * @param id
+     */
     public async findById(id: number): Promise<Cart | null> {
         return PRISMA_CLIENT.cart.findUnique({
             where: {
@@ -37,6 +44,11 @@ export class CartRepository {
             }
         });
     }
+
+    /**
+     * Retrieve a specific cart by user ID.
+     * @param userId
+     */
     public async findByUserId(userId: number): Promise<Cart | null> {
         return PRISMA_CLIENT.cart.findUnique({
             where: {
@@ -52,6 +64,11 @@ export class CartRepository {
         });
     }
 
+    /**
+     * Retrieve a specific cart by ID and item IDs.
+     * @param id
+     * @param itemIds
+     */
     public async findItemsInCart(id: number,itemIds: number[]) {
         return PRISMA_CLIENT.cart.findUnique({
             where: {
@@ -73,6 +90,10 @@ export class CartRepository {
         });
     }
 
+    /**
+     * Create a new cart.
+     * @param cartCreationData
+     */
     public async createOne(cartCreationData: CartCreationRequest): Promise<Cart>{
         return PRISMA_CLIENT.cart.create({
             data: {
@@ -87,6 +108,11 @@ export class CartRepository {
         });
     }
 
+    /**
+     * Update a specific cart by ID.
+     * @param id
+     * @param cartData
+     */
     public async updateOne(id: number, cartData: CartUpdateRequest) {
         return PRISMA_CLIENT.cart.update({
             where: {id: id},

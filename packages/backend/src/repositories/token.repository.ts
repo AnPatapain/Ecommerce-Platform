@@ -13,6 +13,10 @@ export class TokenRepository {
         return TokenRepository.instance;
     }
 
+    /**
+     * Find a token by its hash.
+     * @param hash
+     */
     public async findOneByHash(hash: string): Promise<Token | null> {
         const token = await PRISMA_CLIENT.token.findUnique({
             where: {
@@ -25,6 +29,10 @@ export class TokenRepository {
         } : null;
     }
 
+    /**
+     * Delete many tokens by criteria.
+     * @param criteria
+     */
     public async deleteMany(criteria: Partial<Token>): Promise<void> {
         await PRISMA_CLIENT.token.deleteMany({
             where: {
@@ -33,6 +41,10 @@ export class TokenRepository {
         })
     }
 
+    /**
+     * Create a new token.
+     * @param tokenCreationData
+     */
     public async createOne(tokenCreationData: Omit<Token, 'id'>): Promise<Token> {
         const createdToken = await PRISMA_CLIENT.token.create({
             data: {

@@ -150,7 +150,11 @@ export class ShopItemController extends Controller{
         return this.shopItemRepository.createOne(shopItemData);
     }
 
-
+    /**
+     * Multer function to handle file uploads.
+     * @param request
+     * @private
+     */
     private handleFile(request: express.Request): Promise<void> {
         const multerSingle = multer().single("file");
         console.log('Before being parsed by multer::', request.file);

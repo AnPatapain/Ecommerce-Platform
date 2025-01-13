@@ -25,6 +25,10 @@ export class MinioClient {
         return MinioClient.instance;
     }
 
+    /**
+     * Initialize the bucket if it does not exist
+     * And set the bucket policy to public
+     */
     public async initializeBucket(): Promise<void> {
         try {
             const bucketExists = await this.minioClient.bucketExists(this.bucketName);
@@ -52,6 +56,10 @@ export class MinioClient {
         }
     }
 
+    /**
+     * Upload a image to the bucket
+     * @param file
+     */
     public async upload(
         file: BufferedFile,
     ){
@@ -75,6 +83,10 @@ export class MinioClient {
         }
     }
 
+    /**
+     * Delete a image from the bucket
+     * @param fileUrl
+     */
     public async delete(fileUrl: string) {
         const url = new URL(fileUrl);
         const pathSegments = url.pathname.split('/');

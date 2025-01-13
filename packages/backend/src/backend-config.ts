@@ -27,6 +27,8 @@ type EnvironmentConfig = {
     MINIO_ACCESS_KEY?: string,
     MINIO_SECRET_KEY?: string,
     MINIO_BUCKET_NAME?: string,
+    ADMIN_EMAIL?: string,
+    ADMIN_PASSWORD?: string,
 };
 
 const env: EnvironmentConfig = process.env as any;
@@ -45,5 +47,7 @@ export const CONFIG: typeof env= {
     MINIO_ACCESS_KEY: env.MINIO_ROOT_USER,
     MINIO_SECRET_KEY: env.MINIO_ROOT_PASSWORD,
     MINIO_BUCKET_NAME: 'shop-bucket',
+    ADMIN_EMAIL: env.ADMIN_EMAIL,
+    ADMIN_PASSWORD: env.ADMIN_PASSWORD,
     ...env,
 }
